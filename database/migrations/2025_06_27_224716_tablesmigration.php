@@ -21,20 +21,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('level'); // e.g., "100", "200"
-            $table->foreignId('college_id')->constrained()->onDelete('cascade');
+            $table->foreignId('college_id')->constrained();
             $table->timestamps();
         });
 
-        Schema::create('courses', function (Blueprint $table) {
-            $table->id();
-            $table->string('code')->unique();
-            $table->string('title');
-            $table->foreignId('programme_id')->constrained()->onDelete('cascade');
-            $table->foreignId('semester_id')->constrained()->onDelete('cascade');
-            $table->timestamps();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
+        Schema::create('school_sessions', function (Blueprint $table) {
             $table->id();
             $table->string('session_name'); // e.g., "2024/2025"
             $table->year('year');
@@ -45,7 +36,16 @@ return new class extends Migration
         Schema::create('semesters', function (Blueprint $table) {
             $table->id();
             $table->string('semester_name'); // e.g., "First Semester"
-            $table->foreignId('session_id')->constrained()->onDelete('cascade');
+            $table->foreignId('school_session_id')->constrained();
+            $table->timestamps();
+        });
+
+         Schema::create('courses', function (Blueprint $table) {
+            $table->id();
+            $table->string('code')->unique();
+            $table->string('title');
+            $table->foreignId('programme_id')->constrained();
+            $table->foreignId('semester_id')->constrained();
             $table->timestamps();
         });
 
@@ -79,19 +79,20 @@ return new class extends Migration
             $table->string('country');
             $table->string('state_of_origin');
             $table->string('lga');
-            $table->foreignId('programme_id');
+            $table->foreignId('programme_id')->constrained();
             $table->string('date_of_birth');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('programme_id')->constrained()->onDelete('cascade');
-            $table->foreignId('application_id')->constrained()->onDelete('cascade');
+            $table->string('passport'); // file path or filename
+            $table->string('credential');
+            $table->foreignId('user_id')->constrained();
+            $table->foreignId('application_id')->constrained();
             $table->timestamps();
         });
 
          Schema::create('course_registrations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
-            $table->foreignId('semester_id')->constrained()->onDelete('cascade');
+            $table->foreignId('student_id')->constrained();
+            $table->foreignId('course_id')->constrained();
+            $table->foreignId('semester_id')->constrained();
             $table->timestamps();
 
             $table->unique(['student_id', 'course_id', 'semester_id']);
@@ -99,9 +100,9 @@ return new class extends Migration
 
         Schema::create('results', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained()->onDelete('cascade');
-            $table->foreignId('course_id')->constrained()->onDelete('cascade');
-            $table->foreignId('semester_id')->constrained()->onDelete('cascade');
+            $table->foreignId('student_id')->constrained();
+            $table->foreignId('course_id')->constrained();
+            $table->foreignId('semester_id')->constrained();
             $table->decimal('score', 5, 2);
             $table->string('grade', 2);
             $table->timestamps();
@@ -118,9 +119,9 @@ return new class extends Migration
     {
         Schema::dropIfExists('colleges');
         Schema::dropIfExists('programmes');
-        Schema::dropIfExists('courses');
-        Schema::dropIfExists('sessions');
+        Schema::dropIfExists('school_sessions');
         Schema::dropIfExists('semesters');
+        Schema::dropIfExists('courses');
         Schema::dropIfExists('applications');
         Schema::dropIfExists('students');
         Schema::dropIfExists('course_registrations');
