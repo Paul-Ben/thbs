@@ -12,7 +12,7 @@ class DashboardController extends Controller
         if (Auth::check()) {
             $authUser = Auth::user();
           if ($authUser->userRole == "Superadmin") {
-            return view('superadmin.dashboard');
+            return view('superadmin.dashboard', compact('authUser'));
           }
         }
         return view('dashboard');
