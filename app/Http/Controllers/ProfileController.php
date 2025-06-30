@@ -16,8 +16,17 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $authUser = Auth::user();
+        // if ($request->user()->role == "Superadmin") {
+        //     dd($request->user());
+        //     return view('superadmin.profile_edit', [
+        //         'user' => $request->user(),
+        //         'authUser' => $authUser
+        //     ]);
+        // }
         return view('profile.edit', [
             'user' => $request->user(),
+            'authUser' => $authUser,
         ]);
     }
 
@@ -26,15 +35,25 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $validated = $request->validated();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        if (isset($validated['password'])) {
+            $user->password = bcrypt($validated['password']);
+        }
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $user->save();
+        
+        return Redirect::route('profile.edit')->with('success', 'profile-updated');
     }
 
     /**

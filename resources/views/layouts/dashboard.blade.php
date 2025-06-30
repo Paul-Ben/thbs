@@ -694,7 +694,7 @@
                       </li>
                       <li>
                         <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">My Profile</a>
+                        <a class="dropdown-item" href="{{route('profile.edit')}}">My Profile</a>
                         <a class="dropdown-item" href="#">My Balance</a>
                         <a class="dropdown-item" href="#">Inbox</a>
                         <div class="dropdown-divider"></div>
@@ -811,5 +811,54 @@
 
     <!-- Kaiadmin JS -->
     <script src="{{asset('assets/js/kaiadmin.min.js')}}"></script>
+    @section('scripts')
+    @if (session('success'))
+        <script>
+            swal("{{ session('success') }}", {
+                icon: "success",
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-success'
+                    }
+                }
+            });
+        </script>
+    @endif
+    @if (session('error'))
+        <script>
+            swal("{{session('error')}}", {
+                  icon:"danger",
+                  buttons:{
+                    confirm: {
+                        className: 'btn btn-danger'
+                    }
+                  }
+            })
+        </script>
+    @endif
+    @if (session('info'))
+        <script>
+            swal("{{session('info')}}", {
+                icon:"info",
+                buttons:{
+                    confirm: {
+                        className: 'btn btn-info'
+                    }
+                }
+            })
+        </script>
+    @endif
+    @if ($errors->any())
+        <script>
+            swal("{{$errors->first()}}", {
+                icon:"danger",
+                buttons:{
+                    confirm: {
+                        className: 'btn btn-danger'
+                    }
+                }
+            })
+        </script>
+    @endif
   </body>
 </html>
