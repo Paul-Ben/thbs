@@ -32,7 +32,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-      
         Schema::create('semesters', function (Blueprint $table) {
             $table->id();
             $table->string('semester_name'); // e.g., "First Semester"
@@ -40,7 +39,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-         Schema::create('courses', function (Blueprint $table) {
+        Schema::create('courses', function (Blueprint $table) {
             $table->id();
             $table->string('code')->unique();
             $table->string('title');
@@ -49,22 +48,31 @@ return new class extends Migration
             $table->timestamps();
         });
 
-         Schema::create('applications', function (Blueprint $table) {
+        Schema::create('applications', function (Blueprint $table) {
             $table->id();
             $table->string('application_number')->unique();
-            $table->string('applicant_name');
-            $table->string('email')->unique();
+            $table->string('applicant_surname');
+            $table->string('applicant_othernames');
+            $table->string('date_of_birth');
             $table->string('gender');
-            $table->string('phone');
-            $table->string('address');
-            $table->string('country');
             $table->string('state_of_origin');
             $table->string('lga');
+            $table->string('nationality');
+            $table->string('religion')->nullable();
+            $table->string('marital_status')->nullable();
+            $table->string('home_town')->nullable();
+            $table->string('email')->unique();
+            $table->string('phone');
+            $table->string('correspondence_address')->nullable();
+            $table->string('employment_status')->nullable();
+            $table->string('permanent_home_address')->nullable();
+            $table->string('parent_guardian_name')->nullable();
+            $table->string('parent_guardian_phone')->nullable();
+            $table->string('parent_guardian_address')->nullable();
+            $table->string('parent_guardian_occupation')->nullable();
             $table->foreignId('programme_id')->constrained()->onDelete('cascade');
-            $table->string('date_of_birth');
-            $table->string('passport'); // file path or filename
-            $table->string('credential'); // file path or filename
             $table->enum('status', ['pending', 'approved', 'declined'])->default('pending');
+            $table->string('passport');
             $table->timestamps();
         });
 
@@ -88,7 +96,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-         Schema::create('course_registrations', function (Blueprint $table) {
+        Schema::create('course_registrations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained();
             $table->foreignId('course_id')->constrained();
@@ -126,6 +134,5 @@ return new class extends Migration
         Schema::dropIfExists('students');
         Schema::dropIfExists('course_registrations');
         Schema::dropIfExists('results');
-        
     }
 };
