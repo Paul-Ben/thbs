@@ -72,7 +72,9 @@ return new class extends Migration
             $table->string('parent_guardian_occupation')->nullable();
             $table->foreignId('programme_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['pending', 'approved', 'declined'])->default('pending');
+            $table->boolean('declaration_check')->default(true);
             $table->string('passport');
+            $table->string('credential');
             $table->timestamps();
         });
 

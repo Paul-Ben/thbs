@@ -7,7 +7,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Application extends Model
 {
+    /**
+     * Use application_number for route model binding.
+     */
+    public function getRouteKeyName()
+    {
+        return 'application_number';
+    }
+
     use HasFactory;
+
+    protected $casts = [
+    'declaration_check' => 'boolean',
+];
     protected $fillable = [
         'application_number',
         'applicant_surname',
@@ -32,6 +44,8 @@ class Application extends Model
         'programme_id',
         'status',
         'passport',
+        'credential',
+        'declaration_check',
     ];
 
     public function academicRecords()
