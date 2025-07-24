@@ -17,12 +17,12 @@ return new class extends Migration
             $table->string('level');
             $table->string('school_name')->nullable();
             $table->string('exam_type')->nullable();
-            $table->year('exam_year')->nullable();
+            $table->string('exam_year')->nullable();
             $table->string('subject')->nullable();
             $table->string('grade')->nullable();
             $table->integer('number_of_sittings')->nullable();
             $table->string('other_qualification')->nullable();
-            $table->year('graduation_year')->nullable();
+            $table->string('graduation_year')->nullable();
             $table->string('certificate_obtained')->nullable();
             $table->string('alevel_grade')->nullable();
             $table->timestamps();
