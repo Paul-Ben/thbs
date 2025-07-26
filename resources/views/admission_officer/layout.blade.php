@@ -3,18 +3,11 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Kaiadmin - Bootstrap 5 Admin Dashboard</title>
-    <meta
-      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
-      name="viewport"
-    />
-    <link
-      rel="icon"
-      href="{{asset('assets/img/kaiadmin/favicon.ico')}}"
-      type="image/x-icon"
-    />
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="{{ asset('assets/img/kaiadmin/favicon.ico') }}" type="image/x-icon" />
 
     <!-- Fonts and icons -->
-    <script src="{{asset('assets/js/plugin/webfont/webfont.min.js')}}"></script>
+    <script src="{{ asset('assets/js/plugin/webfont/webfont.min.js') }}"></script>
     <script>
       WebFont.load({
         google: { families: ["Public Sans:300,400,500,600,700"] },
@@ -25,7 +18,7 @@
             "Font Awesome 5 Brands",
             "simple-line-icons",
           ],
-          urls: ["assets/css/fonts.min.css"],
+          urls: ["{{ asset('assets/css/fonts.min.css') }}"],
         },
         active: function () {
           sessionStorage.fonts = true;
@@ -34,14 +27,14 @@
     </script>
 
     <!-- CSS Files -->
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css')}}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css')}}" />
-    <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css')}}" />
-    
-
-    <!-- CSS Just for demo purpose, don't include it in your project -->
-    <link rel="stylesheet" href="{{ asset('assets/css/demo.css')}}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/js/plugin/datatables/datatables.min.css') }}">
     {!! ToastMagic::styles() !!}
+  
   </head>
   <body>
     <div class="wrapper">
@@ -52,10 +45,11 @@
           <div class="logo-header" data-background-color="dark">
             <a href="index.html" class="logo">
               <img
-                src="assets/img/kaiadmin/logo_light.svg"
+                src="{{ asset('assets/img/bsth-logo.jpeg') }}"
                 alt="navbar brand"
                 class="navbar-brand"
-                height="20"
+                height="40"
+                width="40"
               />
             </a>
             <div class="nav-toggle">
@@ -78,7 +72,7 @@
               <li class="nav-item active">
                 <a
                   data-bs-toggle="collapse"
-                  href="#dashboard"
+                  href="{{ route('admissions.dashboard') }}"
                   class="collapsed"
                   aria-expanded="false"
                 >
@@ -105,14 +99,14 @@
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#base">
                   <i class="fas fa-layer-group"></i>
-                  <p>Base</p>
+                  <p>Application Management</p>
                   <span class="caret"></span>
                 </a>
                 <div class="collapse" id="base">
                   <ul class="nav nav-collapse">
                     <li>
-                      <a href="components/avatars.html">
-                        <span class="sub-item">Avatars</span>
+                      <a href="{{ route('admissions.applications') }}">
+                        <span class="sub-item">All Applications</span>
                       </a>
                     </li>
                     <li>
@@ -661,7 +655,7 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/profile.jpg"
+                        src="{{ asset('assets/img/profile.jpg') }}"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
@@ -677,7 +671,7 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/profile.jpg"
+                              src="{{ asset('assets/img/profile.jpg') }}"
                               alt="image profile"
                               class="avatar-img rounded"
                             />
@@ -720,28 +714,7 @@
 
         <div class="container">
           <div class="page-inner">
-            <div class="page-header">
-              <h4 class="page-title">Dashboard</h4>
-              <ul class="breadcrumbs">
-                <li class="nav-home">
-                  <a href="#">
-                    <i class="icon-home"></i>
-                  </a>
-                </li>
-                <li class="separator">
-                  <i class="icon-arrow-right"></i>
-                </li>
-                <li class="nav-item">
-                  <a href="#">Pages</a>
-                </li>
-                <li class="separator">
-                  <i class="icon-arrow-right"></i>
-                </li>
-                <li class="nav-item">
-                  <a href="#">Starter Page</a>
-                </li>
-              </ul>
-            </div>
+           
             <div class="page-category">
                 @yield('content')
             </div>
@@ -778,89 +751,78 @@
       </div>
     </div>
     <!--   Core JS Files   -->
-    <script src="{{asset('assets/js/core/jquery-3.7.1.min.js')}}"></script>
-    <script src="{{asset('assets/js/core/popper.min.js')}}"></script>
-    <script src="{{asset('assets/js/core/bootstrap.min.js')}}"></script>
+    <script src="{{ asset('assets/js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
+    <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/chart.js/chart.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/chart-circle/circles.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/datatables/datatables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/jsvectormap/world.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/gmaps/gmaps.js') }}"></script>
+    <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
+    <script>
+      $(document).ready(function () {
+        $("#basic-datatables").DataTable({});
 
-    <!-- jQuery Scrollbar -->
-    <script src="{{asset('assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js')}}"></script>
+        $("#multi-filter-select").DataTable({
+          pageLength: 5,
+          initComplete: function () {
+            this.api()
+              .columns()
+              .every(function () {
+                var column = this;
+                var select = $(
+                  '<select class="form-select"><option value=""></option></select>'
+                )
+                  .appendTo($(column.footer()).empty())
+                  .on("change", function () {
+                    var val = $.fn.dataTable.util.escapeRegex($(this).val());
 
-    <!-- Chart JS -->
-    <script src="{{asset('assets/js/plugin/chart.js/chart.min.js')}}"></script>
+                    column
+                      .search(val ? "^" + val + "$" : "", true, false)
+                      .draw();
+                  });
 
-    <!-- jQuery Sparkline -->
-    <script src="{{asset('assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js')}}"></script>
+                column
+                  .data()
+                  .unique()
+                  .sort()
+                  .each(function (d, j) {
+                    select.append(
+                      '<option value="' + d + '">' + d + "</option>"
+                    );
+                  });
+              });
+          },
+        });
 
-    <!-- Chart Circle -->
-    <script src="{{asset('assets/js/plugin/chart-circle/circles.min.js')}}"></script>
+        // Add Row
+        $("#add-row").DataTable({
+          pageLength: 5,
+        });
 
-    <!-- Datatables -->
-    <script src="{{asset('assets/js/plugin/datatables/datatables.min.js')}}"></script>
+        var action =
+          '<td> <div class="form-button-action"> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-primary btn-lg" data-original-title="Edit Task"> <i class="fa fa-edit"></i> </button> <button type="button" data-bs-toggle="tooltip" title="" class="btn btn-link btn-danger" data-original-title="Remove"> <i class="fa fa-times"></i> </button> </div> </td>';
 
-    <!-- Bootstrap Notify -->
-    <script src="{{asset('assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js')}}"></script>
-
-    <!-- jQuery Vector Maps -->
-    <script src="{{asset('assets/js/plugin/jsvectormap/jsvectormap.min.js')}}"></script>
-    <script src="{{asset('assets/js/plugin/jsvectormap/world.js')}}"></script>
-
-    <!-- Google Maps Plugin -->
-    <script src="{{asset('assets/js/plugin/gmaps/gmaps.js')}}"></script>
-
-    <!-- Sweet Alert -->
-    <script src="{{asset('assets/js/plugin/sweetalert/sweetalert.min.js')}}"></script>
-
-    <!-- Kaiadmin JS -->
-    <script src="{{asset('assets/js/kaiadmin.min.js')}}"></script>
+        $("#addRowButton").click(function () {
+          $("#add-row")
+            .dataTable()
+            .fnAddData([
+              $("#addName").val(),
+              $("#addPosition").val(),
+              $("#addOffice").val(),
+              action,
+            ]);
+          $("#addRowModal").modal("hide");
+        });
+      });
+    </script>
     {!! ToastMagic::scripts() !!}
-    <!-- @section('scripts')
-    @if (session('success'))
-        <script>
-            swal("{{ session('success') }}", {
-                icon: "success",
-                buttons: {
-                    confirm: {
-                        className: 'btn btn-success'
-                    }
-                }
-            });
-        </script>
-    @endif
-    @if (session('error'))
-        <script>
-            swal("{{session('error')}}", {
-                  icon:"danger",
-                  buttons:{
-                    confirm: {
-                        className: 'btn btn-danger'
-                    }
-                  }
-            })
-        </script>
-    @endif
-    @if (session('info'))
-        <script>
-            swal("{{session('info')}}", {
-                icon:"info",
-                buttons:{
-                    confirm: {
-                        className: 'btn btn-info'
-                    }
-                }
-            })
-        </script>
-    @endif
-    @if ($errors->any())
-        <script>
-            swal("{{$errors->first()}}", {
-                icon:"danger",
-                buttons:{
-                    confirm: {
-                        className: 'btn btn-danger'
-                    }
-                }
-            })
-        </script>
-    @endif -->
+    
   </body>
 </html>

@@ -11,6 +11,7 @@ use Illuminate\Http\Response;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Application;
 use App\Models\Programme;
+use Illuminate\Support\Facades\Auth;
 
 class ApplicationController extends Controller
 {
@@ -50,5 +51,11 @@ class ApplicationController extends Controller
     {
         $result = $this->applicationService->printoutPdfDownload($application);
         return $result['pdf']->download($result['filename']);
+    }
+
+    public function applications()
+    {
+        $authUser = Auth::user();
+        return view('admission_officer.applications', compact('authUser'));
     }
 }

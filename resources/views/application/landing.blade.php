@@ -172,12 +172,52 @@
         .extra-links a:hover {
             color: #f96332;
         }
+    /* Responsive improvements for mobile */
+    @media (max-width: 767.98px) {
+        .login-container {
+            min-height: 100vh;
+            justify-content: flex-start !important;
+            padding-top: 40px !important;
+            padding-bottom: 40px !important;
+            background: #fff;
+            box-shadow: none;
+        }
+        .school-title, .school-subtitle {
+            font-size: 1em !important;
+        }
+        .school-badge {
+            font-size: 1em !important;
+            padding: 2px 8px !important;
+        }
+        .logo-bg, .student-img {
+            display: none !important;
+        }
+    }
+    .school-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #900;
+    }
+    .school-subtitle {
+        font-size: 1em;
+        font-weight: bold;
+    }
+    .school-badge {
+        margin: 0.5em auto;
+        background-color: #000;
+        color: #fff;
+        font-size: 1.1em;
+        font-weight: bold;
+        display: inline-block;
+        padding: 2px 16px;
+        border-radius: 4px;
+    }
     </style>
 </head>
 
 <body>
     <div class="container-fluid g-0">
-        <div class="row g-0 min-vh-100">
+        <div class="row g-0 min-vh-100 align-items-center">
            
             <div class="col-md-6 d-none d-md-flex align-items-end justify-content-center left-image-container">
                 <img src="{{ asset('assets/img/bsth-logo.jpeg') }}" alt="Logo" class="logo-bg">
@@ -185,17 +225,15 @@
                     class="student-img mb-4">
             </div>
            
-            <div class="col-md-6 login-container d-flex flex-column align-items-center justify-content-start pt-3">
+            <div class="col-md-6 login-container d-flex flex-column align-items-center justify-content-center p-4">
                 <div class="w-100" style="max-width: 500px;">
                     <div class="d-flex align-items-center justify-content-center mb-3">
-                        <img src="{{ asset('assets/img/bsth-logo.jpeg') }}" alt="BSTH Logo" style="width:80px;">
+                        <img src="{{ asset('assets/img/bsth-logo.jpeg') }}" alt="BSTH Logo" class="img-fluid" style="width:60px; max-width:100%;">
                     </div>
                     <div class="text-center mb-2">
-                        <div style="font-size:1.2em; font-weight:bold; color:#900;">BENUE STATE UNIVERSITY TEACHING
-                            HOSPITAL MAKURDI</div>
-                        <div style="font-size:1em; font-weight:bold;">INSTITUTE OF HEALTH AND TECHNOLOGY</div>
-                        <div
-                            style="margin:0.5em auto; background-color:#000; color:#fff; font-size:1.1em; font-weight:bold; display:inline-block; padding:2px 16px; border-radius:4px;">
+                        <div class="school-title">BENUE STATE UNIVERSITY TEACHING HOSPITAL MAKURDI</div>
+                        <div class="school-subtitle">INSTITUTE OF HEALTH AND TECHNOLOGY</div>
+                        <div class="school-badge">
                             Welcome back <span style="font-size:1.2em;">👋</span>
                         </div>
                     </div>
