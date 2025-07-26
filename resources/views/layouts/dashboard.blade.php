@@ -2,17 +2,12 @@
 <html lang="en">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Kaiadmin - Bootstrap 5 Admin Dashboard</title>
+    <title>BSUTH - Admin Dashboard</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"
     />
-    <link
-      rel="icon"
-      href="{{asset('assets/img/kaiadmin/favicon.ico')}}"
-      type="image/x-icon"
-    />
-
+    <link rel="icon" href="{{ asset('assets/img/favicon_io/favicon.ico') }}" type="image/x-icon" />
     <!-- Fonts and icons -->
     <script src="{{asset('assets/js/plugin/webfont/webfont.min.js')}}"></script>
     <script>
@@ -25,7 +20,7 @@
             "Font Awesome 5 Brands",
             "simple-line-icons",
           ],
-          urls: ["assets/css/fonts.min.css"],
+          urls: ["{{ asset('assets/css/fonts.min.css') }}"],
         },
         active: function () {
           sessionStorage.fonts = true;
@@ -52,10 +47,11 @@
           <div class="logo-header" data-background-color="dark">
             <a href="index.html" class="logo">
               <img
-                src="assets/img/kaiadmin/logo_light.svg"
+                src="{{ asset('assets/img/bsth-logo.jpeg') }}"
                 alt="navbar brand"
                 class="navbar-brand"
-                height="20"
+                height="40"
+                width="40"
               />
             </a>
             <div class="nav-toggle">
@@ -661,7 +657,7 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/profile.jpg"
+                        src="{{ asset('assets/img/profile.jpg') }}"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
@@ -677,7 +673,7 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/profile.jpg"
+                              src="{{ asset('assets/img/profile.jpg') }}"
                               alt="image profile"
                               class="avatar-img rounded"
                             />

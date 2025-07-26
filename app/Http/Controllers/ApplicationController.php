@@ -22,7 +22,7 @@ class ApplicationController extends Controller
         return view('application.landing');
     }
 
-    public function create()
+    public function create(): View
     {
         $programmes = Programme::all();
         return view('application.apply', compact('programmes'));
@@ -53,7 +53,7 @@ class ApplicationController extends Controller
         return $result['pdf']->download($result['filename']);
     }
 
-    public function applications()
+    public function applications(): view
     {
         $authUser = Auth::user();
         return view('admission_officer.applications', compact('authUser'));
