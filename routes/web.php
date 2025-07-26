@@ -29,15 +29,17 @@ Route::get('/application/printout/{application}', [ApplicationController::class,
 Route::get('/application/printout/{application}/download', [ApplicationController::class, 'downloadPrintout'])->name('application.downloadPrintout');
 
 Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(function () {
-    Route::get('/dashboard', function () { return view('superadmin.dashboard'); })->name('superadmin.dashboard');
+   // Route::get('/dashboard', function () { return view('superadmin.dashboard'); })->name('superadmin.dashboard');
+   Route::get('/dashboard', [DashboardController::class, 'index'])->name('superadmin.dashboard');
 });
 
 Route::prefix('college')->middleware(['auth', 'role:College Admin'])->group(function () {
     Route::get('/dashboard', function () { return view('college.dashboard'); })->name('college.dashboard');
 });
 
-Route::prefix('admissions')->middleware(['auth', 'role:Admissions Officer'])->group(function () {
-    Route::get('/dashboard', function () { return view('admissions.dashboard'); })->name('admissions.dashboard');
+Route::prefix('admissions')->middleware(['auth', 'role:Admission Officer'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admissions.dashboard');
+    Route::get('/applications', [ApplicationController::class, 'applications'])->name('admissions.applications');
 });
 
 Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () {

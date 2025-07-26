@@ -2,48 +2,38 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Models\User;
 
-class AdminUserSeeder extends Seeder
+class AdmissionOfficerSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-         $superadminRole = Role::firstOrCreate(['name' => 'Superadmin']);
+        $admissionOfficerRole = Role::firstOrCreate(['name' => 'Admission Officer']);
         
         // Create permissions if needed
         $permissions = [
             'view dashboard',
-            'manage users',
-            // Add other permissions as needed
+            'view admissions',
+            'edit admissions',
         ];
         
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
         
-        // Assign all permissions to superadmin role
-        $superadminRole->givePermissionTo(Permission::all());
-
-        // Create admin user if not exists
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Super Admin',
-                'password' => bcrypt('password'),
-                'userRole' => 'Superadmin',
-            ]
-        );
+        // Assign all permissions to admission officer role
+        $admissionOfficerRole->givePermissionTo(Permission::all());
 
         // create admissions officer if not exists
         $admissionOfficer = User::firstOrCreate(
-            ['email' => 'admission@example.com'],
+            ['email' => 'admission@bsuth.edu.ng'],
             [
                 'name' => 'Admission Officer',
                 'password' => bcrypt('password'),
@@ -52,8 +42,9 @@ class AdminUserSeeder extends Seeder
         );
 
         // Assign role to user
-        if (!$admin->hasRole('Superadmin')) {
-            $admin->assignRole('Superadmin');
+        if (!$admissionOfficer->hasRole('Admission Officer')) {
+            $admissionOfficer->assignRole('Admission Officer');
         }
+
     }
 }

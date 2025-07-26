@@ -337,7 +337,7 @@
                         Dear, {{ $application->applicant_surname }} {{ $application->applicant_othernames }}<br><br>
                         Kindly be informed that you are required to print a copy of your completed application form and
                         submit it to the Office of
-                        the Registrar for official processing.<br><br>
+                        the Admission Officer for official processing.<br><br>
                         This step is essential to ensure that your application is formally recorded and considered for
                         further administrative action.
                         We advise that you complete this submission promptly to avoid any delays in the processing of

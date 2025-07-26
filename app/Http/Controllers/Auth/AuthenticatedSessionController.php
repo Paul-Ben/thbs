@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use Devrabiul\ToastMagic\Facades\ToastMagic;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -24,13 +25,30 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        try {
+            $request->authenticate();
+            $request->session()->regenerate();
 
-        $request->session()->regenerate();
+            $user = auth()->user();
+            $redirect = match ($user->userRole) {
+                'Superadmin' => route('superadmin.dashboard'),
+                'College Admin' => route('college.dashboard'),
+                'Admission Officer' => route('admissions.dashboard'),
+                'Bursar' => route('bursar.dashboard'),
+                'IT Admin' => route('it.dashboard'),
+                'Student' => route('student.dashboard'),
+                default => '/dashboard',
+            };
 
-        // fallback
-        // return redirect()->intended('/');
-        return redirect()->intended(route('dashboard', absolute: false));
+            ToastMagic::success('Success!', 'Login Successful!');
+
+            return redirect()->intended($redirect);
+
+        } catch (\Exception $e) {
+           
+            ToastMagic::error('Error!', 'Invalid credentials! Please try again.');
+            return redirect()->back()->withInput();
+        }
     }
 
     /**
@@ -44,6 +62,10 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        ToastMagic::info('Success!', 'Logout successful!');
+
+        return redirect('/login');
+
+       
     }
 }
