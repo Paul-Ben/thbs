@@ -13,8 +13,12 @@ class DashboardController extends Controller
             $authUser = Auth::user();
           if ($authUser->userRole == "Superadmin") {
             return view('superadmin.dashboard', compact('authUser'))->with('success', 'Login Successful');
-          }
+          } else if ($authUser->userRole == "Admission Officer") {
+            return view('admission_officer.dashboard', compact('authUser'));
+          
         }
-        return view('dashboard');
+        // return view('dashboard');
     }
+}
+ 
 }
