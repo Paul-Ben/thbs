@@ -56,6 +56,15 @@ class ApplicationController extends Controller
     public function applications(): view
     {
         $authUser = Auth::user();
-        return view('admission_officer.applications', compact('authUser'));
+        $applications = Application::with('programme')->get();
+        return view('admission_officer.applications', compact('authUser', 'applications'));
+    }
+
+    public function show(Application $application): View
+    {
+        $application->load('academicRecords');
+        $oLevelRecords = $application->academicRecords->where('level', 'O/LEVEL')->values();
+        $aLevelRecords = $application->academicRecords->where('level', 'A/LEVEL')->values();
+        return view('admission_officer.show', compact('application', 'oLevelRecords', 'aLevelRecords'));
     }
 }

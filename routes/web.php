@@ -40,6 +40,7 @@ Route::prefix('college')->middleware(['auth', 'role:College Admin'])->group(func
 Route::prefix('admissions')->middleware(['auth', 'role:Admission Officer'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admissions.dashboard');
     Route::get('/applications', [ApplicationController::class, 'applications'])->name('admissions.applications');
+    Route::get('/application/{application}/show', [ApplicationController::class, 'show'])->name('admissions.application.show');
 });
 
 Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () {

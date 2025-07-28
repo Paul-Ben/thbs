@@ -52,4 +52,9 @@ class Application extends Model
     {
         return $this->hasMany(AcademicRecord::class);
     }
+
+    public function programme()
+    {
+        return $this->belongsTo(Programme::class);
+    }
 }

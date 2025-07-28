@@ -34,14 +34,35 @@
                                 <tr>
                                     <th>S/N</th>
                                     <th>Fullname</th>
-                                    <th>Email</th>
+                                    <th>Course Applied</th>
                                     <th>State</th>
                                     <th>Payment</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                                @forelse ($applications as $application)
+                                    <tr>
+                                        <td>{{ $loop->index + 1 }}</td>
+                                        <td>{{ $application->applicant_surname." ".$application->applicant_othernames }}</td>
+                                        <td>{{ $application->programme->name }}</td>
+                                        <td>{{ $application->status }}</td>
+                                        <td><span class="badge bg-success">Success</span></td>
+                                        <td>
+                                            <a href="{{ route('admissions.application.show', $application) }}" class="btn btn-link btn-info btn-sm" title="View"><i
+                                                    class="fa fa-eye fa-lg"></i></a>
+                                            <button class="btn btn-link btn-primary btn-sm" title="Edit"><i
+                                                    class="fa fa-edit fa-lg"></i></button>
+                                            <button class="btn btn-link btn-danger btn-sm" title="Delete"><i
+                                                    class="fa fa-trash fa-lg"></i></button>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center">No applications found.</td>
+                                    </tr>
+                                @endforelse
+                                {{-- <tr>
                                     <td>1</td>
                                     <td>Chinedu Okafor</td>
                                     <td>chinedu.okafor@example.com</td>
@@ -56,8 +77,8 @@
                                                 class="fa fa-trash fa-lg"></i></button>
 
                                     </td>
-                                </tr>
-                                <tr>
+                                </tr> --}}
+                                {{-- <tr>
                                     <td>2</td>
                                     <td>Amina Bello</td>
                                     <td>amina.bello@example.com</td>
@@ -281,7 +302,7 @@
 
                                     </td>
                                 </tr>
-                                </tr>
+                                </tr> --}}
 
                             </tbody>
                         </table>

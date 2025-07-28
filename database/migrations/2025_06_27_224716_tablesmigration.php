@@ -19,8 +19,7 @@ return new class extends Migration
 
         Schema::create('programmes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('level'); // e.g., "100", "200"
+            $table->string('name');// e.g., "100", "200"
             $table->foreignId('college_id')->constrained();
             $table->timestamps();
         });
@@ -29,6 +28,15 @@ return new class extends Migration
             $table->id();
             $table->string('session_name'); // e.g., "2024/2025"
             $table->year('year');
+            $table->boolean('is_current')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('application_sessions', function (Blueprint $table) {
+            $table->id();
+            $table->string('session_name'); // e.g., "2024/2025"
+            $table->year('year');
+            $table->boolean('is_current')->default(0);
             $table->timestamps();
         });
 
@@ -36,6 +44,14 @@ return new class extends Migration
             $table->id();
             $table->string('semester_name'); // e.g., "First Semester"
             $table->foreignId('school_session_id')->constrained();
+            $table->boolean('is_current')->default(false);
+            $table->timestamps();
+        });
+
+        Schema::create('levels', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('semester_id')->constrained();
+            $table->string('name');
             $table->timestamps();
         });
 
@@ -43,6 +59,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->string('title');
+            $table->foreignId('level_id')->constrained();
             $table->foreignId('programme_id')->constrained();
             $table->foreignId('semester_id')->constrained();
             $table->timestamps();
@@ -50,6 +67,7 @@ return new class extends Migration
 
         Schema::create('applications', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_session_id')->constrained();
             $table->string('application_number')->unique();
             $table->string('applicant_surname');
             $table->string('applicant_othernames');
@@ -95,6 +113,7 @@ return new class extends Migration
             $table->string('credential');
             $table->foreignId('user_id')->constrained();
             $table->foreignId('application_id')->constrained();
+            $table->foreignId('level_id')->constrained();
             $table->timestamps();
         });
 
@@ -102,7 +121,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained();
             $table->foreignId('course_id')->constrained();
+            $table->foreignId('school_session_id')->constrained();
             $table->foreignId('semester_id')->constrained();
+            $table->foreignId('level_id')->constrained();
             $table->timestamps();
 
             $table->unique(['student_id', 'course_id', 'semester_id']);
@@ -112,7 +133,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('student_id')->constrained();
             $table->foreignId('course_id')->constrained();
+            $table->foreignId('school_session_id')->constrained();
             $table->foreignId('semester_id')->constrained();
+            $table->foreignId('level_id')->constrained();
             $table->decimal('score', 5, 2);
             $table->string('grade', 2);
             $table->timestamps();
@@ -130,6 +153,7 @@ return new class extends Migration
         Schema::dropIfExists('colleges');
         Schema::dropIfExists('programmes');
         Schema::dropIfExists('school_sessions');
+        Schema::dropIfExists('application_sessions');
         Schema::dropIfExists('semesters');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('applications');

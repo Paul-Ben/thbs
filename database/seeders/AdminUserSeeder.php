@@ -18,13 +18,13 @@ class AdminUserSeeder extends Seeder
          $superadminRole = Role::firstOrCreate(['name' => 'Superadmin']);
         
         // Create permissions if needed
-        $permissions = [
+        $superpermissions = [
             'view dashboard',
             'manage users',
             // Add other permissions as needed
         ];
         
-        foreach ($permissions as $permission) {
+        foreach ($superpermissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
         
@@ -41,6 +41,23 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
+
+        $admissionOfficerRole = Role::firstOrCreate(['name' => 'Admission Officer']);
+        
+        // Create permissions if needed
+        $permissions = [
+            'view dashboard',
+            'view admissions',
+            'edit admissions',
+        ];
+        
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+        
+        // Assign all permissions to admission officer role
+        $admissionOfficerRole->givePermissionTo(Permission::all());
+
         // create admissions officer if not exists
         $admissionOfficer = User::firstOrCreate(
             ['email' => 'admission@example.com'],
@@ -54,6 +71,10 @@ class AdminUserSeeder extends Seeder
         // Assign role to user
         if (!$admin->hasRole('Superadmin')) {
             $admin->assignRole('Superadmin');
+        }
+
+        if (!$admissionOfficer->hasRole('Admission Officer')) {
+            $admissionOfficer->assignRole('Admission Officer');
         }
     }
 }
