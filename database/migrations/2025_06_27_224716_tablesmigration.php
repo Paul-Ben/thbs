@@ -19,7 +19,6 @@ return new class extends Migration
 
         Schema::create('programmes', function (Blueprint $table) {
             $table->id();
-
             $table->string('name');
             $table->string('level');
             $table->foreignId('college_id')->constrained();
