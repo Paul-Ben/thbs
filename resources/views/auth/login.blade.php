@@ -169,11 +169,6 @@
           <div class="text-center mt-4 form-text">
             Don’t have an account? <a href="#">Sign up</a>
           </div>
-          <!-- <div class="extra-links">
-            <a href="{{ route('application.create') }}">Apply</a>
-            <a href="#">All Programs</a>
-            <a href="#">About Us</a>
-          </div> -->
         </div>
       </div>
     </div>
