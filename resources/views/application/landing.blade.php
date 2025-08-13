@@ -202,16 +202,91 @@
         font-size: 1em;
         font-weight: bold;
     }
-    .school-badge {
-        margin: 0.5em auto;
-        background-color: #000;
-        color: #fff;
-        font-size: 1.1em;
-        font-weight: bold;
-        display: inline-block;
-        padding: 2px 16px;
-        border-radius: 4px;
-    }
+            .school-badge {
+            margin: 0.5em auto;
+            background-color: #000;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: bold;
+            display: inline-block;
+            padding: 2px 16px;
+            border-radius: 4px;
+        }
+
+        /* Modal Styles */
+        .modal-lg {
+            max-width: 900px;
+        }
+
+        .modal-header.bg-primary {
+            background: linear-gradient(135deg, #1a2035 0%, #f96332 100%) !important;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .alert-info {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+            color: #0d47a1;
+        }
+
+        .alert-warning {
+            background-color: #fff3e0;
+            border-color: #ff9800;
+            color: #e65100;
+        }
+
+        .card.bg-primary {
+            background: linear-gradient(135deg, #1a2035 0%, #f96332 100%) !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a2035 0%, #f96332 100%);
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .form-control:focus {
+            border-color: #f96332;
+            box-shadow: 0 0 0 0.2rem rgba(249, 99, 50, 0.25);
+        }
+
+        .extra-links .btn {
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .extra-links .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced form styling */
+        .modal-body .form-control {
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .modal-body .form-control:focus {
+            border-color: #f96332;
+            box-shadow: 0 0 0 0.2rem rgba(249, 99, 50, 0.25);
+        }
+
+        .modal-body .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+
+        .modal-body .form-control.is-valid {
+            border-color: #198754;
+            box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+        }
     </style>
 </head>
 
@@ -249,16 +324,297 @@
                         <button type="submit" class="btn btn-signin w-100 mb-3">Sign In</button>
                     </form>
                     <div class="extra-links mt-4">
-                        <a href="{{ route('application.create') }}">Apply</a>
-                        <a href="#">All Programs</a>
-                        <a href="#">About Us</a>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#applyModal">
+                                    <i class="fas fa-edit me-2"></i>Apply Now
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="#" class="btn btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#continueApplicationModal">
+                                    <i class="fas fa-arrow-right me-2"></i>Continue Application
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="#" class="btn btn-outline-secondary w-100" data-bs-toggle="modal" data-bs-target="#retrieveApplicationModal">
+                                    <i class="fas fa-search me-2"></i>Retrieve Application
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Apply Modal -->
+    <div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="applyModalLabel">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        Start Your Application Journey
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning mb-4">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Information</h6>
+                        <ul class="mb-0">
+                            <li>Application fee: <strong>₦5,000.00</strong> (non-refundable)</li>
+                            <li>Payment is processed securely via Flutterwave</li>
+                            <li>You'll be redirected to a secure payment gateway</li>
+                            <li>After successful payment, you can complete your application</li>
+                            <li>Keep your payment reference for future reference</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST" action="{{ route('payment.initialize') }}" id="applyForm">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="surname" class="form-label">Surname *</label>
+                                    <input type="text" class="form-control" 
+                                           id="surname" name="surname" value="{{ old('surname') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="othernames" class="form-label">Other Names *</label>
+                                    <input type="text" class="form-control" 
+                                           id="othernames" name="othernames" value="{{ old('othernames') }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address *</label>
+                                    <input type="email" class="form-control" 
+                                           id="email" name="email" value="{{ old('email') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" 
+                                           id="phone" name="phone" value="{{ old('phone') }}">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+                    <button type="submit" form="applyForm" class="btn btn-primary">
+                        <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Application Modal -->
+    <div class="modal fade" id="continueApplicationModal" tabindex="-1" aria-labelledby="continueApplicationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%) !important;">
+                    <h5 class="modal-title" id="continueApplicationModalLabel">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        Continue Your Application
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-4">
+                        <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                        <ul class="mb-0">
+                            <li>You must have completed payment to continue your application</li>
+                            <li>Check your email for the payment reference number</li>
+                            <li>The payment reference starts with "THBS-" followed by a unique identifier</li>
+                            <li>If you haven't received the email, check your spam folder</li>
+                            <li>Contact support if you need assistance</li>
+                        </ul>
+                    </div>
+
+                    <form method="GET" action="#" id="continueForm">
+                        <div class="mb-3">
+                            <label for="payment_reference" class="form-label">Payment Reference Number *</label>
+                            <input type="text" class="form-control @error('payment_reference') is-invalid @enderror" 
+                                   id="payment_reference" name="payment_reference" 
+                                   placeholder="e.g., THBS-1234567890" required>
+                            <div class="form-text">Enter the payment reference number from your email</div>
+                          
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-arrow-right me-2"></i>Continue Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Retrieve Application Modal -->
+    <div class="modal fade" id="retrieveApplicationModal" tabindex="-1" aria-labelledby="retrieveApplicationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important; color: white !important;">
+                    <h5 class="modal-title" id="retrieveApplicationModalLabel">
+                        <i class="fas fa-search me-2"></i>
+                        Retrieve Your Application
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning mb-4">
+                        <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                        <ul class="mb-0">
+                            <li>You must have submitted an application to retrieve it</li>
+                            <li>Check your email for the application number</li>
+                            <li>The application number is unique to your application</li>
+                            <li>If you haven't received the email, check your spam folder</li>
+                            <li>Contact support if you need assistance</li>
+                        </ul>
+                    </div>
+
+                    <form method="GET" action="#" id="retrieveForm">
+                        <div class="mb-3">
+                            <label for="application_number" class="form-label">Application Number *</label>
+                            <input type="text" class="form-control @error('application_number') is-invalid @enderror" 
+                                   id="application_number" name="application_number" 
+                                   placeholder="e.g., BSUTH-001432-2024" required>
+                            <div class="form-text">Enter the application number from your email</div>
+                           
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-search me-2"></i>Retrieve Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS Bundle CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <!-- SweetAlert -->
+    <script src="{{ asset('assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+    
+    <!-- Form Submission Handlers -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Apply Form Validation and Submission Handler
+            const applyForm = document.getElementById('applyForm');
+            if (applyForm) {
+                applyForm.addEventListener('submit', function(e) {
+                    // Let the form submit normally - validation will happen on the backend
+                    // No need to prevent default or add client-side validation
+                });
+            }
+            
+            // Continue Application Form Handler
+            const continueForm = document.getElementById('continueForm');
+            if (continueForm) {
+                continueForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const paymentRef = document.getElementById('payment_reference').value.trim();
+                    if (!paymentRef) return;
+                    
+                    // Show loading state
+                    const submitBtn = continueForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Verifying...';
+                        submitBtn.disabled = true;
+                    }
+                    
+                    // Redirect to continue application route
+                    window.location.href = "{{ route('application.continue', '') }}/" + paymentRef;
+                });
+            }
+            
+            // Retrieve Application Form Handler
+            const retrieveForm = document.getElementById('retrieveForm');
+            if (retrieveForm) {
+                retrieveForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const appNumber = document.getElementById('application_number').value.trim();
+                    if (!appNumber) return;
+                    
+                    // Show loading state
+                    const submitBtn = retrieveForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Retrieving...';
+                        submitBtn.disabled = true;
+                    }
+                    
+                    // Redirect to retrieve application route
+                    window.location.href = "{{ route('application.retrieve', '') }}/" + appNumber;
+                });
+            }
+            
+        });
+    </script>
+    
+    @if (session('success'))
+        <script>
+            swal("{{ session('success') }}", {
+                icon: "success",
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-success'
+                    }
+                }
+            });
+        </script>
+    @endif
+    
+    @if (session('error'))
+        <script>
+            swal("{{ session('error') }}", {
+                icon: "error",
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-danger'
+                    }
+                }
+            });
+        </script>
+    @endif
+    
+    @if ($errors->any())
+        <script>
+            swal("{{ $errors->first() }}", {
+                icon: "error",
+                buttons: {
+                    confirm: {
+                        className: 'btn btn-danger'
+                    }
+                }
+            });
+        </script>
+    @endif
 </body>
 
 </html>

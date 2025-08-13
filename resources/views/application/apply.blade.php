@@ -32,6 +32,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/kaiadmin.min.css') }}" />
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
+    
     <style>
         body {
             background: #f4f6fa;
@@ -242,7 +243,7 @@
                 <div class="card">
                     <div class="card-header text-center">Application Form</div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('application.store') }}" enctype="multipart/form-data"
+                        <form method="POST" action="{{ route('application.store', ['tx_ref' => $payment->reference]) }}" enctype="multipart/form-data"
                             id="multiStepForm">
                             @csrf
                             <!-- Stepper -->
@@ -271,12 +272,12 @@
                             <div class="progress mb-4">
                                 <div class="progress-bar" role="progressbar" style="width: 20%" id="formProgress"></div>
                             </div>
-                            @if (session('success'))
+                            <!-- @if (session('success'))
                                 <div class="alert alert-success">{{ session('success') }}</div>
                             @endif
                             @if (session('error'))
                                 <div class="alert alert-danger">{{ session('error') }}</div>
-                            @endif
+                            @endif -->
                             <!-- Step 1: Personal Details -->
                             <div class="form-step active" id="step-1">
                                 <div class="form-section-title">APPLICANT'S PERSONAL DETAILS</div>
@@ -296,12 +297,12 @@
                                     <div class="col-md-6 mb-3">
                                         <label>Surname</label>
                                         <input type="text" class="form-control" name="applicant_surname"
-                                            value="{{ old('applicant_surname') }}">
+                                            value="{{ $applicant->applicant_surname }}" readonly>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label>Other Names</label>
                                         <input type="text" class="form-control" name="applicant_othernames"
-                                            value="{{ old('applicant_othernames') }}">
+                                            value="{{ $applicant->applicant_othernames }}" readonly>
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label>Date of Birth</label>
@@ -383,17 +384,17 @@
                                     <div class="col-md-6 mb-3">
                                         <label>Home Town</label>
                                         <input type="text" class="form-control" name="home_town"
-                                            value="{{ old('home_town') }}">
+                                            value="{{ old('home_town') }}" >
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label>E-Mail</label>
                                         <input type="email" class="form-control" name="email"
-                                            value="{{ old('email') }}">
+                                            value="{{ $applicant->email }}" readonly>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label>Phone No.</label>
                                         <input type="text" class="form-control" name="phone"
-                                            value="{{ old('phone') }}">
+                                            value="{{ $applicant->phone }}" readonly>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label>Correspondence Address</label>

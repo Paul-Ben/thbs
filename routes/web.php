@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
@@ -23,8 +24,17 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/', [ApplicationController::class, 'landing'])->name('application.landing');
-Route::get('/application/apply', [ApplicationController::class, 'create'])->name('application.create');
-Route::post('/application', [ApplicationController::class, 'store'])->name('application.store');
+
+// Payment routes
+Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
+Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
+Route::get('/payment/success', function() { return view('payment.success'); })->name('payment.success');
+
+// Application routes
+Route::get('/application/apply/{tx_ref}', [ApplicationController::class, 'create'])->name('application.create');
+Route::post('/application/{tx_ref}', [ApplicationController::class, 'store'])->name('application.store');
+Route::get('/application/continue/{tx_ref}', [ApplicationController::class, 'continueApplication'])->name('application.continue');
+Route::get('/application/retrieve/{application_number}', [ApplicationController::class, 'retrieveApplication'])->name('application.retrieve');
 Route::get('/application/printout/{application}', [ApplicationController::class, 'printout'])->name('application.printout');
 Route::get('/application/printout/{application}/download', [ApplicationController::class, 'downloadPrintout'])->name('application.downloadPrintout');
 
