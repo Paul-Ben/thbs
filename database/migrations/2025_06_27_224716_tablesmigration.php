@@ -19,7 +19,7 @@ return new class extends Migration
 
         Schema::create('programmes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');// e.g., "100", "200"
+            $table->string('name');// 
             $table->foreignId('college_id')->constrained();
             $table->timestamps();
         });
