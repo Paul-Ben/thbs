@@ -19,7 +19,9 @@ return new class extends Migration
 
         Schema::create('programmes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');// 
+
+            $table->string('name');
+            $table->string('level');
             $table->foreignId('college_id')->constrained();
             $table->timestamps();
         });
@@ -67,15 +69,16 @@ return new class extends Migration
 
         Schema::create('applications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('school_session_id')->constrained();
-            $table->string('application_number')->unique();
+            $table->string('payment_reference');
+            $table->foreignId('application_session_id')->constrained();
+            $table->string('application_number')->unique()->nullable();
             $table->string('applicant_surname');
             $table->string('applicant_othernames');
-            $table->string('date_of_birth');
-            $table->string('gender');
-            $table->string('state_of_origin');
-            $table->string('lga');
-            $table->string('nationality');
+            $table->string('date_of_birth')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('state_of_origin')->nullable();
+            $table->string('lga')->nullable();
+            $table->string('nationality')->nullable();
             $table->string('religion')->nullable();
             $table->string('marital_status')->nullable();
             $table->string('home_town')->nullable();
@@ -88,11 +91,11 @@ return new class extends Migration
             $table->string('parent_guardian_phone')->nullable();
             $table->string('parent_guardian_address')->nullable();
             $table->string('parent_guardian_occupation')->nullable();
-            $table->foreignId('programme_id')->constrained()->onDelete('cascade');
+            $table->foreignId('programme_id')->nullable()->constrained()->onDelete('cascade');
             $table->enum('status', ['pending', 'approved', 'declined'])->default('pending');
-            $table->boolean('declaration_check')->default(true);
-            $table->string('passport');
-            $table->string('credential');
+            $table->boolean('declaration_check')->default(true)->nullable();
+            $table->string('passport')->nullable();
+            $table->string('credential')->nullable();
             $table->timestamps();
         });
 

@@ -11,15 +11,16 @@ use Illuminate\Support\Facades\DB;
 
 class ApplicationService
 {
-    public function create(array $data): Application
+    public function create(array $data, string $txRef): Application
     {
-       
+
         $data['programme_id'] = $data['programme_id'];
         $data['application_number'] = $this->generateAppNumber();
         $data['status'] = 'pending';
+        $data['is_filled'] = 1;
         $data['declaration_check'] = $data['declaration_check'] ?? 'false';
 
-         if (isset($data['passport'])) {
+        if (isset($data['passport'])) {
             $timestamp = now()->timestamp;
             $othernames = isset($data['applicant_othernames']) ? $data['applicant_othernames'] : 'passport';
             $filename = $othernames . '_' . $timestamp;
@@ -32,8 +33,8 @@ class ApplicationService
             $data['credential'] = $this->handleUpload($data['credential'], 'application-credentials', $credFilename);
         }
 
-        return DB::transaction(function () use ($data) {
-            $application = Application::create($data);
+        return DB::transaction(function () use ($data, $txRef) {
+            $application = Application::updateOrCreate(['payment_reference' => $txRef], $data);
             $this->storeAcademicRecords($application, $data);
             return $application;
         });
@@ -65,7 +66,7 @@ class ApplicationService
         ]);
         $filename = preg_replace('/[^A-Za-z0-9_\-]/', '_', $application->applicant_othernames) . '_application_printout.pdf';
         return ['pdf' => $pdf, 'filename' => $filename];
-    } 
+    }
 
     protected function storeAcademicRecords(Application $application, array $data): void
     {
