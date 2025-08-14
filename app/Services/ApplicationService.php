@@ -14,7 +14,6 @@ class ApplicationService
     public function create(array $data, string $txRef): Application
     {
 
-        $data['programme_id'] = $data['programme_id'];
         $data['application_number'] = $this->generateAppNumber();
         $data['status'] = 'pending';
         $data['is_filled'] = 1;

@@ -25,7 +25,8 @@ class ApplicationController extends Controller
 
     public function landing()
     {
-        return view('application.landing');
+        $programmes = Programme::with('applicationFees')->get();
+        return view('application.landing', compact('programmes'));
     }
 
     public function create(string $txRef): View|RedirectResponse
@@ -44,7 +45,7 @@ class ApplicationController extends Controller
 
         $programmes = Programme::all();
 
-        $applicant = $payment->application;
+        $applicant = $payment->application->load('programme');
 
         return view('application.apply', compact('programmes', 'payment', 'applicant'));
     }

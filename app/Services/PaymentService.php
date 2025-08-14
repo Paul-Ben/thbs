@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Payment;
 use App\Models\Application;
 use App\Models\ApplicationSession;
+use App\Models\Programme;
+use App\Models\ApplicationFee;
 use App\Services\NotificationService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -20,10 +22,23 @@ class PaymentService
 
     public function initializePayment(array $data): array
     {
-        if (empty($data['email']) || empty($data['surname'])) {
+        if (empty($data['email']) || empty($data['surname']) || empty($data['programme_id'])) {
             Log::error('Invalid payment data', ['data' => $data]);
             throw new Exception('Invalid payment data');
         }
+
+        // Get programme and its application fee
+        $programme = Programme::with('applicationFees')->find($data['programme_id']);
+        if (!$programme) {
+            throw new Exception('Programme not found');
+        }
+
+        $applicationFee = $programme->applicationFees->first();
+        if (!$applicationFee) {
+            throw new Exception('Application fee not found for selected programme');
+        }
+
+        $amount = $applicationFee->amount;
 
         $flutterwaveKey = config('services.flutterwave.secret_key');
         if (empty($flutterwaveKey)) {
@@ -36,7 +51,7 @@ class PaymentService
 
         $payload = [
             'tx_ref' => $txRef,
-            'amount' => 5000.00,
+            'amount' => $amount,
             'currency' => 'NGN',
             'redirect_url' => route('payment.callback'),
             'customer' => [
@@ -45,14 +60,17 @@ class PaymentService
                 'phone_number' => $data['phone'] ?? 'N/A'
             ],
             'customizations' => [
-                'title' => 'THBS Application Fee',
-                'description' => 'Application fee payment for ' . $data['surname'] . ' ' . ($data['othernames'] ?? '')
+                'title' => 'THBS Application Fee - ' . $programme->name,
+                'description' => 'Application fee payment for ' . $programme->name . ' - ' . $data['surname'] . ' ' . ($data['othernames'] ?? '')
             ],
             'meta' => [
                 'surname' => $data['surname'],
                 'othernames' => $data['othernames'] ?? '',
                 'email' => $data['email'],
-                'phone' => $data['phone'] ?? 'N/A'
+                'phone' => $data['phone'] ?? 'N/A',
+                'programme_id' => $data['programme_id'],
+                'programme_name' => $programme->name,
+                'application_fee' => $amount
             ]
         ];
 
@@ -111,6 +129,7 @@ class PaymentService
                 'payment_reference' => $txRef,
                 'application_session_id' => $application_session->id,
                 'is_filled' => 0,
+                'programme_id' => $meta['programme_id'],
             ]);
 
             return Payment::updateOrCreate(

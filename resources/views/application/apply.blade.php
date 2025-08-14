@@ -467,15 +467,10 @@
                             <div class="form-step" id="step-4">
                                 <div class="form-section-title">ACADEMIC RECORD DETAILS</div>
                                 <div class="mb-3">
-                                    <label>Programme</label>
-                                    <select class="form-select" name="programme_id">
-                                        <option value="">-- Select Programme --</option>
-                                        @foreach ($programmes as $programme)
-                                            <option value="{{ $programme->id }}"
-                                                {{ old('programme_id') == $programme->id ? 'selected' : '' }}>
-                                                {{ $programme->name }}</option>
-                                        @endforeach
-                                    </select>
+                                    <label>Selected Programme</label>
+                                    <input type="text" class="form-control" name="programme_name"
+                                        value="{{ $applicant->programme->name }}" readonly>
+                                    <small class="form-text text-muted">This is the programme you selected during payment.</small>
                                 </div>
                                 <div class="mb-3">
                                     <label>Upload Credentials (PDF)</label>

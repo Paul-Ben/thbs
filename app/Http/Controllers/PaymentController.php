@@ -20,6 +20,7 @@ class PaymentController extends Controller
             'surname' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'othernames' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
             'phone' => 'nullable|string|regex:/^[0-9+\-\s\(\)]+$/|max:20',
+            'programme_id' => 'required|exists:programmes,id',
         ], [
             'surname.regex' => 'Surname must contain only letters and spaces.',
             'othernames.regex' => 'Other names must contain only letters and spaces.',
@@ -28,6 +29,8 @@ class PaymentController extends Controller
             'othernames.required' => 'Other names are required.',
             'email.required' => 'Email address is required.',
             'email.email' => 'Please enter a valid email address.',
+            'programme_id.required' => 'Please select a programme.',
+            'programme_id.exists' => 'Selected programme is invalid.',
         ]);
 
         if (preg_match('/[0-9]/', $request->surname)) {
