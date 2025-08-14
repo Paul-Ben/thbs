@@ -92,6 +92,23 @@
                   </ul>
                 </div>
               </li>
+              
+              @if(auth()->check() && auth()->user()->userRole === 'Superadmin')
+              <!-- Superadmin Navigation -->
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-cog"></i>
+                </span>
+                <h4 class="text-section">Administration</h4>
+              </li>
+              <li class="nav-item">
+                <a href="{{ route('superadmin.users.index') }}">
+                  <i class="fas fa-users"></i>
+                  <p>User Management</p>
+                </a>
+              </li>
+              @endif
+              
               <li class="nav-section">
                 <span class="sidebar-mini-icon">
                   <i class="fa fa-ellipsis-h"></i>

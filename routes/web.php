@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
@@ -41,6 +42,18 @@ Route::get('/application/printout/{application}/download', [ApplicationControlle
 Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(function () {
    // Route::get('/dashboard', function () { return view('superadmin.dashboard'); })->name('superadmin.dashboard');
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('superadmin.dashboard');
+   
+   // User Management Routes
+   Route::get('/users', [UserManagementController::class, 'index'])->name('superadmin.users.index');
+
+   Route::get('/users/create', [UserManagementController::class, 'create'])->name('superadmin.users.create');
+   Route::post('/users', [UserManagementController::class, 'store'])->name('superadmin.users.store');
+   Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('superadmin.users.show');
+   Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('superadmin.users.edit');
+   Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('superadmin.users.update');
+   Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('superadmin.users.destroy');
+   Route::post('/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('superadmin.users.reset-password');
+   Route::post('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('superadmin.users.toggle-status');
 });
 
 Route::prefix('college')->middleware(['auth', 'role:College Admin'])->group(function () {
