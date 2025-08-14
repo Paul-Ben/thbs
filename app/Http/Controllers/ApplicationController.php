@@ -130,7 +130,9 @@ class ApplicationController extends Controller
     public function applications(): view
     {
         $authUser = Auth::user();
-        $applications = Application::with('programme')->get();
+        $applications = Application::with('programme')
+            ->where('is_filled', 1)
+            ->get();
         return view('admission_officer.applications', compact('authUser', 'applications'));
     }
 

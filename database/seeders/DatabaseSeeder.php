@@ -15,10 +15,12 @@ class DatabaseSeeder extends Seeder
     {
        $this->call(RoleAndPermissionSeeder::class);
        $this->call(AdminUserSeeder::class);
+       $this->call(BursarUserSeeder::class);
        $this->call(CollegeSeeder::class);
        $this->call(ProgrammeSeeder::class);
        $this->call(ApplicationFeeSeeder::class);
        $this->call(SchoolSession::class);
        $this->call(ApplicationSessionSeeder::class);
+       $this->call(AdmissionOfficerSeeder::class);
     }
 }
