@@ -362,8 +362,8 @@
                     <div class="alert alert-warning mb-4">
                         <h6><i class="fas fa-exclamation-triangle me-2"></i>Important Information</h6>
                         <ul class="mb-0">
-                            <li>Application fee: <strong>₦5,000.00</strong> (non-refundable)</li>
-                            <li>Payment is processed securely via Flutterwave</li>
+                            <li>Application fee varies by programme (non-refundable)</li>
+                            <li>Select your programme to see the exact fee amount</li>
                             <li>You'll be redirected to a secure payment gateway</li>
                             <li>After successful payment, you can complete your application</li>
                             <li>Keep your payment reference for future reference</li>
@@ -399,9 +399,36 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <label for="phone" class="form-label">Phone Number *</label>
                                     <input type="tel" class="form-control" 
                                            id="phone" name="phone" value="{{ old('phone') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="programme_id" class="form-label">Select Programme *</label>
+                                    <select class="form-control" id="programme_id" name="programme_id" required>
+                                        <option value="">Choose your programme...</option>
+                                        @foreach($programmes as $programme)
+                                            <option value="{{ $programme->id }}" 
+                                                    data-fee="{{ $programme->applicationFees->first()->amount ?? 0 }}"
+                                                    {{ old('programme_id') == $programme->id ? 'selected' : '' }}>
+                                                {{ $programme->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="alert alert-info" id="fee-display" style="display: none;">
+                                    <strong>Application Fee: ₦<span id="fee-amount">0</span></strong>
+                                    <small class="d-block">This fee is non-refundable and must be paid before proceeding with your application.</small>
                                 </div>
                             </div>
                         </div>
@@ -572,6 +599,47 @@
                     // Redirect to retrieve application route
                     window.location.href = "{{ route('application.retrieve', '') }}/" + appNumber;
                 });
+            }
+            
+            // Programme selection handler
+            const programmeSelect = document.getElementById('programme_id');
+            const feeDisplay = document.getElementById('fee-display');
+            const feeAmount = document.getElementById('fee-amount');
+            const proceedBtn = document.querySelector('button[form="applyForm"]');
+            
+            if (programmeSelect && feeDisplay && feeAmount) {
+                programmeSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const fee = selectedOption.getAttribute('data-fee');
+                    
+                    if (fee && parseFloat(fee) > 0) {
+                        feeAmount.textContent = parseFloat(fee).toLocaleString('en-NG', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                        feeDisplay.style.display = 'block';
+                        
+                        // Enable proceed button
+                        if (proceedBtn) {
+                            proceedBtn.disabled = false;
+                            proceedBtn.innerHTML = '<i class="fas fa-credit-card me-2"></i>Proceed to Payment (₦' + 
+                                parseFloat(fee).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ')';
+                        }
+                    } else {
+                        feeDisplay.style.display = 'none';
+                        
+                        // Disable proceed button if no programme selected
+                        if (proceedBtn) {
+                            proceedBtn.disabled = true;
+                            proceedBtn.innerHTML = '<i class="fas fa-credit-card me-2"></i>Proceed to Payment';
+                        }
+                    }
+                });
+                
+                // Initially disable proceed button
+                if (proceedBtn) {
+                    proceedBtn.disabled = true;
+                }
             }
             
         });
