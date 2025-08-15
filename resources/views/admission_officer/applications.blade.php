@@ -45,7 +45,7 @@
                                     <tr>
                                         <td>{{ $loop->index + 1 }}</td>
                                         <td>{{ $application->applicant_surname." ".$application->applicant_othernames }}</td>
-                                        <td>{{ $application->programme->name }}</td>
+                                        <td>{{ $application->programme ? $application->programme->name : 'Not Assigned' }}</td>
                                         <td>{{ $application->status }}</td>
                                         <td><span class="badge bg-success">Success</span></td>
                                         <td>

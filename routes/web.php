@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\BursarController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
@@ -67,7 +68,9 @@ Route::prefix('admissions')->middleware(['auth', 'role:Admission Officer'])->gro
 });
 
 Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () {
-    Route::get('/dashboard', function () { return view('bursar.dashboard'); })->name('bursar.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('bursar.dashboard');
+    Route::get('/payments/application', [BursarController::class, 'payments'])->name('bursar.payments.application');
+    Route::get('/payment/{payment}', [BursarController::class, 'showPayment'])->name('bursar.payment.show');
 });
 
 Route::prefix('it')->middleware(['auth', 'role:IT Admin'])->group(function () {
