@@ -106,10 +106,10 @@
                                 <p>Financial Reports</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="#" class="collapsed" aria-expanded="false">
+                        <li class="nav-item {{ request()->routeIs('bursar.application-fees.*') ? 'active' : '' }}">
+                            <a href="{{ route('bursar.application-fees.index') }}" class="collapsed" aria-expanded="false">
                                 <i class="fas fa-money-bill-wave"></i>
-                                <p>Application Fees</p>
+                                <p>Application Fee Management</p>
                             </a>
                         </li>
                         <li class="nav-item">

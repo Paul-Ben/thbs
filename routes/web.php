@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BursarController;
+use App\Http\Controllers\ApplicationFeeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
@@ -71,6 +72,19 @@ Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('bursar.dashboard');
     Route::get('/payments/application', [BursarController::class, 'payments'])->name('bursar.payments.application');
     Route::get('/payment/{payment}', [BursarController::class, 'showPayment'])->name('bursar.payment.show');
+    
+    // Application Fee Management Routes
+    Route::resource('application-fees', ApplicationFeeController::class, [
+        'names' => [
+            'index' => 'bursar.application-fees.index',
+            'create' => 'bursar.application-fees.create',
+            'store' => 'bursar.application-fees.store',
+            'show' => 'bursar.application-fees.show',
+            'edit' => 'bursar.application-fees.edit',
+            'update' => 'bursar.application-fees.update',
+            'destroy' => 'bursar.application-fees.destroy',
+        ]
+    ]);
 });
 
 Route::prefix('it')->middleware(['auth', 'role:IT Admin'])->group(function () {
