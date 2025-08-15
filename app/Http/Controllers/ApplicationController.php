@@ -12,7 +12,7 @@ use Illuminate\Http\Response;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Application;
 use App\Models\Programme;
-use App\Models\Payment;
+use App\Models\ApplicationFeePayment;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\NotificationService;
@@ -32,7 +32,7 @@ class ApplicationController extends Controller
     public function create(string $txRef): View|RedirectResponse
     {
 
-        $payment = Payment::where('reference', $txRef)->first();
+        $payment = ApplicationFeePayment::where('reference', $txRef)->first();
 
         if ($payment->application->is_filled == 1) {
             return redirect()->route('application.printout', $payment->application);
@@ -52,7 +52,7 @@ class ApplicationController extends Controller
 
     public function store(StoreApplicationRequest $request, string $txRef): RedirectResponse
     {
-        $payment = Payment::where('reference', $txRef)->first();
+        $payment = ApplicationFeePayment::where('reference', $txRef)->first();
 
         if (!$payment || !$payment->isSuccessful()) {
             return redirect()->route('application.landing')
@@ -94,7 +94,7 @@ class ApplicationController extends Controller
 
     public function continueApplication(string $txRef): RedirectResponse
     {
-        $payment = Payment::where('reference', $txRef)->with('application')->first();
+        $payment = ApplicationFeePayment::where('reference', $txRef)->with('application')->first();
 
         if (
             $payment &&

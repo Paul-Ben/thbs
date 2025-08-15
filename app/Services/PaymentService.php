@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Payment;
+use App\Models\ApplicationFeePayment;
 use App\Models\Application;
 use App\Models\ApplicationSession;
 use App\Models\Programme;
 use App\Models\ApplicationFee;
+use App\Models\Transaction;
 use App\Services\NotificationService;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -95,7 +96,7 @@ class PaymentService
         ];
     }
 
-    public function verifyAndLogPayment(string $transactionId): Payment
+    public function verifyAndLogPayment(string $transactionId): ApplicationFeePayment
     {
 
         $baseUrl = config('services.flutterwave.base_url');
@@ -132,7 +133,7 @@ class PaymentService
                 'programme_id' => $meta['programme_id'],
             ]);
 
-            return Payment::updateOrCreate(
+            $applicationFeePayment = ApplicationFeePayment::updateOrCreate(
                 ['reference' => $txRef],
                 [
                     'amount' => $data['amount'] ?? 0,
@@ -145,6 +146,16 @@ class PaymentService
                     'metadata' => $data
                 ]
             );
+
+            $transaction = $applicationFeePayment->transactions()->create([
+                'type' => 'Application fee payment',
+                'status' => $data['status'] ?? 'failed',
+                'amount' => $data['amount'] ?? 0,
+                'currency_code' => $data['currency'] ?? 'NGN',
+                'is_reconciled' => false,
+            ]);
+
+            return $applicationFeePayment;
         });
 
         if ($payment->status === 'successful') {

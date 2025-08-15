@@ -68,14 +68,14 @@ class Application extends Model
         return $this->belongsTo(SchoolSession::class);
     }
 
-    public function payments()
+    public function applicationFeePayments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(ApplicationFeePayment::class, 'reference', 'payment_reference');
     }
 
     public function hasSuccessfulPayment()
     {
-        return $this->payments()->where('status', 'successful')->exists();
+        return $this->applicationFeePayments()->where('status', 'successful')->exists();
     }
 
     public function isFilled()

@@ -17,14 +17,17 @@ class ApplicationFeeSeeder extends Seeder
             [
                 'programme_id' => 1, // Nursing
                 'amount' => 5000.00,
+                'created_at' => now(),
             ],
             [
                 'programme_id' => 2, // Medical Laboratory Science
                 'amount' => 8000.00,
+                'created_at' => now(),
             ],
             [
                 'programme_id' => 3, // Anatomy
                 'amount' => 6500.00,
+                'created_at' => now(),
             ],
         ]);
     }

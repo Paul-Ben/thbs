@@ -100,6 +100,12 @@
                                 </ul>
                             </div>
                         </li>
+                        <li class="nav-item {{ request()->routeIs('bursar.transactions') ? 'active' : '' }}">
+                            <a href="{{ route('bursar.transactions') }}" class="collapsed" aria-expanded="false">
+                                <i class="fas fa-history"></i>
+                                <p>Transaction History</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="#" class="collapsed" aria-expanded="false">
                                 <i class="fas fa-chart-bar"></i>
@@ -118,12 +124,7 @@
                                 <p>School Charges</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="#" class="collapsed" aria-expanded="false">
-                                <i class="fas fa-receipt"></i>
-                                <p>Transaction History</p>
-                            </a>
-                        </li>
+                       
                     </ul>
                 </div>
             </div>
