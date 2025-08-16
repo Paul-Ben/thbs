@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Payment;
+use App\Models\ApplicationFeePayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,14 +10,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
-       $recentTransactions = Payment::with(['application.programme'])
+               $recentTransactions = ApplicationFeePayment::with(['application.programme'])
        ->orderBy('created_at', 'desc')
        ->limit(5)
        ->get();
    
 
-        $totalRevenue = Payment::where('status', 'successful')->sum('amount');
-        $applicationRevenue = Payment::where('status', 'successful')
+        $totalRevenue = ApplicationFeePayment::where('status', 'successful')->sum('amount');
+        $applicationRevenue = ApplicationFeePayment::where('status', 'successful')
             ->whereHas('application', function($query) {
                 $query->whereNotNull('programme_id');
             })
@@ -25,7 +25,7 @@ class DashboardController extends Controller
         
         $schoolChargeRevenue = 0;
         
-        $totalTransactions = Payment::count();
+        $totalTransactions = ApplicationFeePayment::count();
         if (Auth::check()) {
             $authUser = Auth::user();
           if ($authUser->userRole == "Superadmin") {

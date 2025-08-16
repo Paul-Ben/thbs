@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use App\Mail\PaymentSuccessful;
 use App\Mail\ApplicationSubmitted;
-use App\Models\Payment;
+use App\Models\ApplicationFeePayment;
 use App\Models\Application;
 
 class NotificationService
@@ -14,7 +14,7 @@ class NotificationService
     /**
      * Send payment successful notification
      */
-    public function sendPaymentSuccessfulNotification(Payment $payment): void
+    public function sendPaymentSuccessfulNotification(ApplicationFeePayment $payment): void
     {
         $payment->load('application');
 

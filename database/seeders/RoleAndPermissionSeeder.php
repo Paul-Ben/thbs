@@ -40,6 +40,7 @@ class RoleAndPermissionSeeder extends Seeder
             'edit admissions',
             'view finance',
             'edit finance',
+            'view payments',
             'view it',
             'edit it',
         ];

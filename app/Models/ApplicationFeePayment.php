@@ -5,12 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Payment extends Model
+class ApplicationFeePayment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-
         'amount',
         'currency',
         'payment_method',
@@ -52,4 +51,12 @@ class Payment extends Model
     {
         return $this->application()->exists();
     }
-} 
+
+    /**
+     * Get all transactions for this payment.
+     */
+    public function transactions()
+    {
+        return $this->morphMany(Transaction::class, 'paymentable');
+    }
+}

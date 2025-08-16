@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Payment;
+use App\Models\ApplicationFeePayment;
 
 class PaymentSuccessful extends Mailable
 {
@@ -19,7 +19,7 @@ class PaymentSuccessful extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(Payment $payment)
+    public function __construct(ApplicationFeePayment $payment)
     {
         $this->payment = $payment;
     }

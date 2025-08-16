@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class SchoolSession extends Model
 {
     use HasFactory;
+    
     protected $fillable = ['session_name', 'year'];
 
     public function semesters()

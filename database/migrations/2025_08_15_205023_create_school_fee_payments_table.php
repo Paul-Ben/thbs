@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('school_fee_payments', function (Blueprint $table) {
             $table->id();
             $table->decimal('amount', 10, 2);
             $table->string('currency', 3)->default('NGN');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('school_fee_payments');
     }
 };
