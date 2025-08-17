@@ -9,7 +9,7 @@ class SchoolSession extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['session_name', 'year'];
+    protected $fillable = ['session_name', 'year', 'is_current'];
 
     public function semesters()
     {

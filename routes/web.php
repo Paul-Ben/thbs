@@ -6,6 +6,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BursarController;
 use App\Http\Controllers\ApplicationFeeController;
+use App\Http\Controllers\SchoolSessionController;
+use App\Http\Controllers\SemesterController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
@@ -56,6 +58,34 @@ Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(func
    Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('superadmin.users.destroy');
    Route::post('/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('superadmin.users.reset-password');
    Route::post('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('superadmin.users.toggle-status');
+   
+   // School Session Management Routes
+   Route::resource('school-sessions', SchoolSessionController::class, [
+       'names' => [
+           'index' => 'superadmin.school-sessions.index',
+           'create' => 'superadmin.school-sessions.create',
+           'store' => 'superadmin.school-sessions.store',
+           'show' => 'superadmin.school-sessions.show',
+           'edit' => 'superadmin.school-sessions.edit',
+           'update' => 'superadmin.school-sessions.update',
+           'destroy' => 'superadmin.school-sessions.destroy',
+       ]
+   ]);
+   Route::patch('/school-sessions/{schoolSession}/set-current', [SchoolSessionController::class, 'setCurrent'])->name('superadmin.school-sessions.set-current');
+   
+   // Semester Management Routes
+   Route::resource('semesters', SemesterController::class, [
+       'names' => [
+           'index' => 'superadmin.semesters.index',
+           'create' => 'superadmin.semesters.create',
+           'store' => 'superadmin.semesters.store',
+           'show' => 'superadmin.semesters.show',
+           'edit' => 'superadmin.semesters.edit',
+           'update' => 'superadmin.semesters.update',
+           'destroy' => 'superadmin.semesters.destroy',
+       ]
+   ]);
+   Route::patch('/semesters/{semester}/set-current', [SemesterController::class, 'setCurrent'])->name('superadmin.semesters.set-current');
 });
 
 Route::prefix('college')->middleware(['auth', 'role:College Admin'])->group(function () {
