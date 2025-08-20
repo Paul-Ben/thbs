@@ -2,13 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\ApplicationFeePayment;
-use App\Models\Application;
-use App\Models\ApplicationSession;
-use App\Models\Programme;
-use App\Models\ApplicationFee;
-use App\Models\Transaction;
+use App\Support\PaymentTypeResolver;
 use App\Services\NotificationService;
+use App\Constants\PaymentStatus;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -21,30 +17,15 @@ class PaymentService
     {
     }
 
-    public function initializePayment(array $data): array
+    public function initializePayment(array $data, string $paymentType, array $paymentConfig): array
     {
-        if (empty($data['email']) || empty($data['surname']) || empty($data['programme_id'])) {
-            Log::error('Invalid payment data', ['data' => $data]);
-            throw new Exception('Invalid payment data');
-        }
+        $paymentHandler = PaymentTypeResolver::resolve($paymentType);
 
-        // Get programme and its application fee
-        $programme = Programme::with('applicationFees')->find($data['programme_id']);
-        if (!$programme) {
-            throw new Exception('Programme not found');
-        }
-
-        $applicationFee = $programme->applicationFees->first();
-        if (!$applicationFee) {
-            throw new Exception('Application fee not found for selected programme');
-        }
-
-        $amount = $applicationFee->amount;
+        $paymentData = $paymentHandler->buildPaymentData($data);
 
         $flutterwaveKey = config('services.flutterwave.secret_key');
         if (empty($flutterwaveKey)) {
-            Log::error('Flutterwave secret key is missing in configuration.');
-            throw new Exception('Flutterwave initialization failed.');
+            throw new Exception('Flutterwave secret key is missing.');
         }
 
         $baseUrl = config('services.flutterwave.base_url');
@@ -52,7 +33,7 @@ class PaymentService
 
         $payload = [
             'tx_ref' => $txRef,
-            'amount' => $amount,
+            'amount' => $paymentData['amount'],
             'currency' => 'NGN',
             'redirect_url' => route('payment.callback'),
             'customer' => [
@@ -61,18 +42,10 @@ class PaymentService
                 'phone_number' => $data['phone'] ?? 'N/A'
             ],
             'customizations' => [
-                'title' => 'THBS Application Fee - ' . $programme->name,
-                'description' => 'Application fee payment for ' . $programme->name . ' - ' . $data['surname'] . ' ' . ($data['othernames'] ?? '')
+                'title' => $paymentData['title'],
+                'description' => $paymentData['description']
             ],
-            'meta' => [
-                'surname' => $data['surname'],
-                'othernames' => $data['othernames'] ?? '',
-                'email' => $data['email'],
-                'phone' => $data['phone'] ?? 'N/A',
-                'programme_id' => $data['programme_id'],
-                'programme_name' => $programme->name,
-                'application_fee' => $amount
-            ]
+            'meta' => $paymentData['meta']
         ];
 
         $endpoint = rtrim($baseUrl, '/') . '/v3/payments';
@@ -83,29 +56,28 @@ class PaymentService
         }
 
         $responseData = $response->json();
-        Log::info('Flutterwave payment initialized successfully', [
-            'tx_ref' => $txRef,
-            'status' => $responseData['status'] ?? 'unknown',
-            'response_structure' => $responseData
-        ]);
 
         return [
-            'status' => $responseData['status'] ?? 'unknown',
+            'status' => $responseData['status'] ?? PaymentStatus::FAILED,
             'link' => $responseData['data']['link'] ?? null,
             'tx_ref' => $txRef
         ];
     }
 
-    public function verifyAndLogPayment(string $transactionId): ApplicationFeePayment
+    public function verifyAndLogPayment(string $transactionId): array
     {
-
         $baseUrl = config('services.flutterwave.base_url');
         $verifyUrl = rtrim($baseUrl, '/') . "/v3/transactions/{$transactionId}/verify";
 
         $response = Http::withToken(config('services.flutterwave.secret_key'))->get($verifyUrl);
         $json = $response->json();
 
-        if ($response->failed() || ($json['status'] ?? null) !== 'success') {
+        if (!in_array($json['status'], ['success', 'successful'])) {
+            Log::error('Payment verification failed', [
+                'transaction_id' => $transactionId,
+                'received_status' => $json['status'] ?? 'null',
+                'full_response' => $json
+            ]);
             throw new Exception('Payment verification failed');
         }
 
@@ -113,57 +85,28 @@ class PaymentService
         $txRef = $data['tx_ref'] ?? null;
 
         if (!$txRef) {
-            Log::error('Missing tx_ref in verification response', ['data' => $data]);
             throw new Exception('Verification response missing tx_ref');
         }
 
         $meta = $data['meta'] ?? [];
+        $paymentType = $meta['payment_type'];
 
-        $application_session = ApplicationSession::where('is_current', true)->first();
+        $paymentHandler = PaymentTypeResolver::resolve($paymentType);
 
-        $payment = DB::transaction(function () use ($data, $txRef, $meta, $application_session) {
-            $application = Application::create([
-                'applicant_surname' => $meta['surname'],
-                'applicant_othernames' => $meta['othernames'],
-                'email' => $meta['email'],
-                'phone' => $meta['phone'],
-                'payment_reference' => $txRef,
-                'application_session_id' => $application_session->id,
-                'is_filled' => 0,
-                'programme_id' => $meta['programme_id'],
-            ]);
+        $paymentResult = DB::transaction(
+            fn() =>
+            $paymentHandler->persistVerifiedPayment($data, $txRef, $meta)
+        );
 
-            $applicationFeePayment = ApplicationFeePayment::updateOrCreate(
-                ['reference' => $txRef],
-                [
-                    'amount' => $data['amount'] ?? 0,
-                    'currency' => $data['currency'] ?? 'NGN',
-                    'payment_method' => 'card',
-                    'transaction_id' => $data['id'] ?? null,
-                    'status' => $data['status'] ?? 'failed',
-                    'payment_date' => now(),
-                    'description' => 'Application fee payment for ' . ($meta['surname'] ?? '') . ' ' . ($meta['othernames'] ?? ''),
-                    'metadata' => $data
-                ]
-            );
-
-            $transaction = $applicationFeePayment->transactions()->create([
-                'type' => 'Application fee payment',
-                'status' => $data['status'] ?? 'failed',
-                'amount' => $data['amount'] ?? 0,
-                'currency_code' => $data['currency'] ?? 'NGN',
-                'is_reconciled' => false,
-            ]);
-
-            return $applicationFeePayment;
-        });
-
-        if ($payment->status === 'successful') {
-            $this->notificationService->sendPaymentSuccessfulNotification($payment);
+        if ($paymentResult['status'] === PaymentStatus::SUCCESSFUL) {
+            $this->notificationService->sendPaymentSuccessfulNotification($paymentResult['payment_model']);
         }
 
-        return $payment;
-
+        return [
+            'status' => $paymentResult['status'],
+            'payment_type' => $paymentType,
+            'reference' => $txRef,
+            'payment_model' => $paymentResult['payment_model']
+        ];
     }
-
 }

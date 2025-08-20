@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use App\Services\PaymentService;
+use App\Support\PaymentTypeResolver;
+use App\Constants\PaymentStatus;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class PaymentController extends Controller
 {
@@ -15,82 +18,54 @@ class PaymentController extends Controller
 
     public function initialize(Request $request): RedirectResponse
     {
-        $request->validate([
-            'email' => 'required|email|max:255',
-            'surname' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'othernames' => 'required|string|max:255|regex:/^[a-zA-Z\s]+$/',
-            'phone' => 'nullable|string|regex:/^[0-9+\-\s\(\)]+$/|max:20',
-            'programme_id' => 'required|exists:programmes,id',
-        ], [
-            'surname.regex' => 'Surname must contain only letters and spaces.',
-            'othernames.regex' => 'Other names must contain only letters and spaces.',
-            'phone.regex' => 'Phone number must contain only numbers.',
-            'surname.required' => 'Surname is required.',
-            'othernames.required' => 'Other names are required.',
-            'email.required' => 'Email address is required.',
-            'email.email' => 'Please enter a valid email address.',
-            'programme_id.required' => 'Please select a programme.',
-            'programme_id.exists' => 'Selected programme is invalid.',
-        ]);
+        $paymentType = $request->payment_type;
+        $paymentHandler = PaymentTypeResolver::resolve($paymentType);
 
-        if (preg_match('/[0-9]/', $request->surname)) {
-            return redirect()->route('application.landing')
-                ->withErrors(['surname' => 'Surname cannot contain numbers.']);
-        }
-
-        if (preg_match('/[0-9]/', $request->othernames)) {
-            return redirect()->route('application.landing')
-                ->withErrors(['othernames' => 'Other names cannot contain numbers.']);
-        }
-
-        if ($request->phone && !preg_match('/^[0-9+\-\s\(\)]+$/', $request->phone)) {
-            return redirect()->route('application.landing')
-                ->withErrors(['phone' => 'Phone number contains invalid characters.']);
-        }
+        // Validate using the handler
+        $paymentHandler->validate($request);
 
         try {
-            $result = $this->paymentService->initializePayment($request->all());
+            $paymentData = $paymentHandler->buildPaymentData($request->all());
 
-            if ($result['status'] === 'success' && !empty($result['link'])) {
+            $result = $this->paymentService->initializePayment(
+                $paymentData,
+                $paymentType,
+                $paymentData
+            );
+
+            if (in_array($result['status'], [PaymentStatus::SUCCESS, PaymentStatus::SUCCESSFUL]) && !empty($result['link'])) {
                 return redirect($result['link']);
             }
 
-            return redirect()->route('application.landing')
-                ->with('error', 'Failed to initialize payment. Please try again.');
+            return back()->with('error', 'Failed to initialize payment. Please try again.');
 
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Payment initialization error: ' . $e->getMessage());
-            return redirect()->route('application.landing')
-                ->with('error', 'An error occurred while initializing payment.');
+            return back()->with('error', 'An error occurred while initializing payment.');
         }
     }
 
     public function callback(Request $request): RedirectResponse
     {
-        // Log::info('Flutterwave callback received', $request->all());
-
         try {
-            if ($request->transaction_id) {
-                $payment = $this->paymentService->verifyAndLogPayment($request->transaction_id);
-
-                if ($payment->status === 'successful') {
-                    return redirect()->route('application.create', $payment->reference)
-                        ->with('success', 'Payment successful! You can now proceed with your application.');
-                }
-
-                return redirect()->route('application.landing')
-                    ->with('error', 'Payment verification failed');
+            if (!$request->transaction_id) {
+                return redirect()->route('application.landing')->with('error', 'Missing transaction ID in callback');
             }
 
-            return redirect()->route('application.landing')
-                ->with('error', 'Missing transaction ID in callback');
+            $paymentResult = $this->paymentService->verifyAndLogPayment($request->transaction_id);
+            $paymentHandler = PaymentTypeResolver::resolve($paymentResult['payment_type']);
+
+            if (in_array($paymentResult['status'], [PaymentStatus::SUCCESS, PaymentStatus::SUCCESSFUL])) {
+                return $paymentHandler->handleSuccess($paymentResult);
+            }
+
+            return redirect()->route('application.landing')->with('error', 'Payment verification failed');
 
         } catch (\Exception $e) {
             Log::error('Payment callback error: ' . $e->getMessage());
-            return redirect()->route('application.landing')
-                ->with('error', 'An error occurred during payment processing');
+            return redirect()->route('application.landing')->with('error', 'An error occurred during payment processing');
         }
     }
-
-
 }
