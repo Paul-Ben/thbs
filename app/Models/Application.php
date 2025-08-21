@@ -73,6 +73,11 @@ class Application extends Model
         return $this->hasMany(ApplicationFeePayment::class, 'reference', 'payment_reference');
     }
 
+    public function aptitudeTestFees()
+    {
+        return $this->hasMany(AptitudeTestFee::class, 'application_id', 'id');
+    }
+
     public function hasSuccessfulPayment()
     {
         return $this->applicationFeePayments()->where('status', 'successful')->exists();

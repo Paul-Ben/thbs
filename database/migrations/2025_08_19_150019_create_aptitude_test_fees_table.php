@@ -11,14 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('aptitude_test_fees', function (Blueprint $table) {
             $table->id();
-            $table->morphs('paymentable'); 
-            $table->string('type');
-            $table->string('status');
-            $table->decimal('amount', 10, 2);
-            $table->string('currency_code', 3)->default('NGN');
-            $table->boolean('is_reconciled')->default(false);
             $table->timestamps();
         });
     }
@@ -28,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('aptitude_test_fees');
     }
 };

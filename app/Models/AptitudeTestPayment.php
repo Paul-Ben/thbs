@@ -3,13 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ApplicationFeePayment extends Model
+class AptitudeTestPayment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'application_id',
         'amount',
         'currency',
         'payment_method',
@@ -27,29 +29,9 @@ class ApplicationFeePayment extends Model
         'amount' => 'decimal:2'
     ];
 
-    public function application()
+    public function application(): BelongsTo
     {
-        return $this->belongsTo(Application::class, 'reference', 'payment_reference');
-    }
-
-    public function isSuccessful()
-    {
-        return $this->status === 'successful';
-    }
-
-    public function isPending()
-    {
-        return $this->status === 'pending';
-    }
-
-    public function isFailed()
-    {
-        return $this->status === 'failed';
-    }
-
-    public function hasApplication()
-    {
-        return $this->application()->exists();
+        return $this->belongsTo(Application::class);
     }
 
     public function transactions()

@@ -340,6 +340,11 @@
                                     <i class="fas fa-search me-2"></i>Retrieve Application
                                 </a>
                             </div>
+                            <div class="col-12 mt-3">
+                                <a href="#" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#aptitudeTestModal">
+                                    <i class="fas fa-graduation-cap me-2"></i>Aptitude Test
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -380,6 +385,7 @@
                                            id="surname" name="surname" value="{{ old('surname') }}" required>
                                 </div>
                             </div>
+                            <input type="hidden" name="payment_type" value="application_fee">
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="othernames" class="form-label">Other Names *</label>
@@ -530,6 +536,67 @@
                             </button>
                             <button type="submit" class="btn btn-warning">
                                 <i class="fas fa-search me-2"></i>Retrieve Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aptitude Test Modal -->
+    <div class="modal fade" id="aptitudeTestModal" tabindex="-1" aria-labelledby="aptitudeTestModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white" style="background: linear-gradient(135deg, #1a2035 0%, #2c3e50 100%) !important;">
+                    <h5 class="modal-title" id="aptitudeTestModalLabel">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        Aptitude Test Payment
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-primary mb-4">
+                        <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                        <ul class="mb-0">
+                            <li>You must have a valid application to proceed with aptitude test payment</li>
+                            <li>Enter your application number to continue</li>
+                            <li>The aptitude test fee is ₦5,000</li>
+                            <li>Payment confirmation will be sent to your registered email</li>
+                        </ul>
+                    </div>
+
+                    <form method="POST" action="{{ route('payment.initialize') }}" id="aptitudeTestForm">
+                        @csrf
+                        <input type="hidden" name="payment_type" value="{{ \App\Constants\PaymentType::APTITUDE_TEST_FEE }}">
+                        
+                        <div class="mb-3">
+                            <label for="application_number" class="form-label">Application Number *</label>
+                            <input type="text" class="form-control @error('application_number') is-invalid @enderror" 
+                                   id="application_number" name="application_number" 
+                                   placeholder="Enter your application number (e.g., THBS-APP-2024-001)" required>
+                            @error('application_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">
+                                <i class="fas fa-lightbulb text-warning me-1"></i>
+                                Your application number was provided when you completed your application form
+                            </div>
+                            
+                        </div>
+
+                    
+                            <div class="alert alert-info">
+                                    <strong>Application Test Fee: ₦<span>5,000</span></strong>
+                                    <small class="d-block">This fee is non-refundable and must be paid before proceeding.</small>
+                            </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card me-2"></i>Proceed to Payment (₦5,000.00)
                             </button>
                         </div>
                     </form>
