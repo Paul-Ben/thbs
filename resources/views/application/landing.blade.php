@@ -587,7 +587,7 @@
 
                     
                             <div class="alert alert-info">
-                                    <strong>Application Test Fee: ₦<span>5,000</span></strong>
+                                    <strong>Application Test Fee: ₦<span>{{ number_format($aptitudeTestFee->amount) }}</span></strong>
                                     <small class="d-block">This fee is non-refundable and must be paid before proceeding.</small>
                             </div>
 
@@ -596,7 +596,7 @@
                                 <i class="fas fa-times me-2"></i>Cancel
                             </button>
                             <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-credit-card me-2"></i>Proceed to Payment (₦5,000.00)
+                                <i class="fas fa-credit-card me-2"></i>Proceed to Payment (₦{{ number_format($aptitudeTestFee->amount) }})
                             </button>
                         </div>
                     </form>

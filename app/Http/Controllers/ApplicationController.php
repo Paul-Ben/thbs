@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Application;
 use App\Models\Programme;
 use App\Models\ApplicationFeePayment;
+use App\Models\AptitudeTestFee;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\NotificationService;
@@ -26,7 +27,10 @@ class ApplicationController extends Controller
     public function landing()
     {
         $programmes = Programme::with('applicationFees')->get();
-        return view('application.landing', compact('programmes'));
+
+        $aptitudeTestFee = AptitudeTestFee::where('is_active', true)->firstOrFail();
+
+        return view('application.landing', compact('programmes', 'aptitudeTestFee'));
     }
 
     public function create(string $txRef): View|RedirectResponse

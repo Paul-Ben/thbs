@@ -115,20 +115,20 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>
-                                        @if($transaction->application)
-                                            {{ $transaction->application->applicant_surname }} {{ $transaction->application->applicant_othernames }}
+                                        @if($transaction->paymentable && $transaction->paymentable->application)
+                                            {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
                                         @else
                                             N/A
                                         @endif
                                     </td>
                                     <td>
-                                        @if($transaction->application)
-                                            {{ $transaction->application->email }}
+                                        @if($transaction->paymentable && $transaction->paymentable->application)
+                                            {{ $transaction->paymentable->application->email }}
                                         @else
                                             N/A
                                         @endif
                                     </td>
-                                    <td>{{ $transaction->reference }}</td>
+                                    <td>{{ $transaction->paymentable->reference ?? 'N/A' }}</td>
                                     <td class="text-end">
                                         <span class="fw-bold text-{{ $transaction->status === 'successful' ? 'success' : ($transaction->status === 'pending' ? 'warning' : 'danger') }}">
                                             ₦{{ number_format($transaction->amount, 2) }}
@@ -143,7 +143,7 @@
                                         <small class="text-muted">{{ $transaction->created_at->format('Y-m-d') }}</small>
                                     </td>
                                     <td class="text-center">
-                                        <a href="{{ route('bursar.payment.show', $transaction->id) }}" class="btn btn-link btn-info btn-sm" title="View Transaction Details">
+                                        <a href="{{ route('bursar.transaction.show', $transaction->id) }}" class="btn btn-link btn-info btn-sm" title="View Transaction Details">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
