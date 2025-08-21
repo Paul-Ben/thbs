@@ -94,7 +94,7 @@
                                             <option value="">Select Level</option>
                                             @foreach($levels as $level)
                                                 <option value="{{ $level->id }}" {{ old('level_id') == $level->id ? 'selected' : '' }}>
-                                                    {{ $level->level_name }}
+                                                    {{ $level->name }}
                                                 </option>
                                             @endforeach
                                         </select>
