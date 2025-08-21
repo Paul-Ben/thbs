@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Course extends Model
 {
     use HasFactory;
-    protected $fillable = ['code', 'title', 'programme_id', 'semester_id'];
+    
+    
+    protected $fillable = ['code', 'title', 'programme_id', 'level_id', 'semester_id'];
 
     public function programme()
     {
@@ -18,6 +20,12 @@ class Course extends Model
     public function semester()
     {
         return $this->belongsTo(Semester::class);
+    }
+
+    
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
     }
 
     public function courseRegistrations()
