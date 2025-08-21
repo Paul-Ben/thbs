@@ -17,84 +17,174 @@ class CourseSeeder extends Seeder
      */
     public function run(): void
     {
-      
-        $nursingProgramme = Programme::where('name', 'B.N.Sc Nursing Science')->first();
-        $medicineProgramme = Programme::where('name', 'MB.BS Medicine and Surgery')->first();
+        $this->command->info('Starting CourseSeeder...');
+        
+        // Debug: Show available programmes
+        $programmes = Programme::all();
+        $this->command->info('Available programmes: ' . $programmes->pluck('name')->implode(', '));
+        
+        // Debug: Show available semesters
+        $semesters = Semester::all();
+        $this->command->info('Available semesters: ' . $semesters->pluck('semester_name')->implode(', '));
+        
+        // Debug: Show available levels
+        $levels = Level::with('semester')->get();
+        $this->command->info('Available levels:');
+        foreach ($levels as $level) {
+            $this->command->line("  - {$level->name} (Semester: {$level->semester->semester_name}, ID: {$level->id})");
+        }
 
-  
+        // Try to find programmes with flexible matching
+        $nursingProgramme = Programme::where('name', 'LIKE', '%Nursing%')->first();
+        $medicineProgramme = Programme::where('name', 'LIKE', '%Medicine%')->first();
+
+        // If not found, use first available programmes
+        if (!$nursingProgramme && $programmes->count() > 0) {
+            $nursingProgramme = $programmes->first();
+            $this->command->warn("Nursing programme not found, using: {$nursingProgramme->name}");
+        }
+
+        if (!$medicineProgramme && $programmes->count() > 1) {
+            $medicineProgramme = $programmes->skip(1)->first();
+            $this->command->warn("Medicine programme not found, using: {$medicineProgramme->name}");
+        }
+
+        // Find semesters
         $firstSemester = Semester::where('semester_name', 'First Semester')->first();
         $secondSemester = Semester::where('semester_name', 'Second Semester')->first();
-   
-        if (!$nursingProgramme || !$medicineProgramme || !$firstSemester || !$secondSemester) {
-            $this->command->warn('Required programmes or semesters not found. Skipping CourseSeeder.');
+
+        if (!$nursingProgramme || !$medicineProgramme) {
+            $this->command->error('Not enough programmes found. Please ensure programmes are seeded first.');
             return;
         }
 
-      
+        if (!$firstSemester || !$secondSemester) {
+            $this->command->error('Required semesters not found. Please ensure semesters are seeded first.');
+            return;
+        }
+
+        $this->command->info("Using programmes:");
+        $this->command->line("  - Nursing: {$nursingProgramme->name} (ID: {$nursingProgramme->id})");
+        $this->command->line("  - Medicine: {$medicineProgramme->name} (ID: {$medicineProgramme->id})");
+        
+        $this->command->info("Using semesters:");
+        $this->command->line("  - First: {$firstSemester->semester_name} (ID: {$firstSemester->id})");
+        $this->command->line("  - Second: {$secondSemester->semester_name} (ID: {$secondSemester->id})");
+
+        // Helper function to find level
         $findLevel = function (string $levelName, int $semesterId) {
-            return Level::where('name', $levelName)
+            $level = Level::where('name', $levelName)
                         ->where('semester_id', $semesterId)
                         ->first();
+            
+            if ($level) {
+                $this->command->info("Found level: {$levelName} (ID: {$level->id}) for semester ID: {$semesterId}");
+            } else {
+                $this->command->warn("Level not found: {$levelName} for semester ID: {$semesterId}");
+            }
+            
+            return $level;
         };
 
+        $coursesCreated = 0;
+
         // 100 Level courses for First Semester
+        $this->command->info('Creating 100 Level courses for First Semester...');
         $level100_firstSem = $findLevel('100 Level', $firstSemester->id);
         if ($level100_firstSem) {
-            Course::create([
-                'code' => 'NUR101',
-                'title' => 'Introduction to Nursing',
-                'programme_id' => $nursingProgramme->id,
-                'semester_id' => $firstSemester->id,
-                'level_id' => $level100_firstSem->id,
-            ]);
+            // Check if course already exists
+            if (!Course::where('code', 'NUR101')->exists()) {
+                Course::create([
+                    'code' => 'NUR101',
+                    'title' => 'Introduction to Nursing',
+                    'programme_id' => $nursingProgramme->id,
+                    'semester_id' => $firstSemester->id,
+                    'level_id' => $level100_firstSem->id,
+                ]);
+                $coursesCreated++;
+                $this->command->info('Created: NUR101 - Introduction to Nursing');
+            }
 
-            Course::create([
-                'code' => 'MED101',
-                'title' => 'Human Anatomy I',
-                'programme_id' => $medicineProgramme->id,
-                'semester_id' => $firstSemester->id,
-                'level_id' => $level100_firstSem->id,
-            ]);
+            if (!Course::where('code', 'MED101')->exists()) {
+                Course::create([
+                    'code' => 'MED101',
+                    'title' => 'Human Anatomy I',
+                    'programme_id' => $medicineProgramme->id,
+                    'semester_id' => $firstSemester->id,
+                    'level_id' => $level100_firstSem->id,
+                ]);
+                $coursesCreated++;
+                $this->command->info('Created: MED101 - Human Anatomy I');
+            }
         }
 
         // 100 Level courses for Second Semester
+        $this->command->info('Creating 100 Level courses for Second Semester...');
         $level100_secondSem = $findLevel('100 Level', $secondSemester->id);
         if ($level100_secondSem) {
-            Course::create([
-                'code' => 'NUR102',
-                'title' => 'Fundamentals of Nursing Practice',
-                'programme_id' => $nursingProgramme->id,
-                'semester_id' => $secondSemester->id,
-                'level_id' => $level100_secondSem->id,
-            ]);
+            if (!Course::where('code', 'NUR102')->exists()) {
+                Course::create([
+                    'code' => 'NUR102',
+                    'title' => 'Fundamentals of Nursing Practice',
+                    'programme_id' => $nursingProgramme->id,
+                    'semester_id' => $secondSemester->id,
+                    'level_id' => $level100_secondSem->id,
+                ]);
+                $coursesCreated++;
+                $this->command->info('Created: NUR102 - Fundamentals of Nursing Practice');
+            }
 
-            Course::create([
-                'code' => 'MED102',
-                'title' => 'Human Physiology I',
-                'programme_id' => $medicineProgramme->id,
-                'semester_id' => $secondSemester->id,
-                'level_id' => $level100_secondSem->id,
-            ]);
+            if (!Course::where('code', 'MED102')->exists()) {
+                Course::create([
+                    'code' => 'MED102',
+                    'title' => 'Human Physiology I',
+                    'programme_id' => $medicineProgramme->id,
+                    'semester_id' => $secondSemester->id,
+                    'level_id' => $level100_secondSem->id,
+                ]);
+                $coursesCreated++;
+                $this->command->info('Created: MED102 - Human Physiology I');
+            }
         }
 
         // 200 Level courses for First Semester
+        $this->command->info('Creating 200 Level courses for First Semester...');
         $level200_firstSem = $findLevel('200 Level', $firstSemester->id);
         if ($level200_firstSem) {
-            Course::create([
-                'code' => 'NUR201',
-                'title' => 'Medical-Surgical Nursing',
-                'programme_id' => $nursingProgramme->id,
-                'semester_id' => $firstSemester->id,
-                'level_id' => $level200_firstSem->id,
-            ]);
+            if (!Course::where('code', 'NUR201')->exists()) {
+                Course::create([
+                    'code' => 'NUR201',
+                    'title' => 'Medical-Surgical Nursing',
+                    'programme_id' => $nursingProgramme->id,
+                    'semester_id' => $firstSemester->id,
+                    'level_id' => $level200_firstSem->id,
+                ]);
+                $coursesCreated++;
+                $this->command->info('Created: NUR201 - Medical-Surgical Nursing');
+            }
 
-            Course::create([
-                'code' => 'MED201',
-                'title' => 'Medical Biochemistry',
-                'programme_id' => $medicineProgramme->id,
-                'semester_id' => $firstSemester->id,
-                'level_id' => $level200_firstSem->id,
-            ]);
+            if (!Course::where('code', 'MED201')->exists()) {
+                Course::create([
+                    'code' => 'MED201',
+                    'title' => 'Medical Biochemistry',
+                    'programme_id' => $medicineProgramme->id,
+                    'semester_id' => $firstSemester->id,
+                    'level_id' => $level200_firstSem->id,
+                ]);
+                $coursesCreated++;
+                $this->command->info('Created: MED201 - Medical Biochemistry');
+            }
+        }
+
+        $this->command->info("CourseSeeder completed!");
+        $this->command->info("Created {$coursesCreated} new courses.");
+        $this->command->info("Total courses in database: " . Course::count());
+        
+        // Show created courses
+        $courses = Course::with(['programme', 'semester', 'level'])->get();
+        $this->command->info("All courses in database:");
+        foreach ($courses as $course) {
+            $this->command->line("  - {$course->code}: {$course->title} ({$course->programme->name}, {$course->semester->semester_name}, {$course->level->name})");
         }
     }
 }
