@@ -10,7 +10,7 @@ class AptitudeTestFee extends Model
     use HasFactory;
 
     protected $fillable = [
-        'programme_id',
+        'name',
         'amount',
         'currency',
         'description',
@@ -22,13 +22,7 @@ class AptitudeTestFee extends Model
         'is_active' => 'boolean'
     ];
 
-    public function programme()
-    {
-        return $this->belongsTo(Programme::class);
-    }
-
-    public function aptitudeTestPayments()
-    {
-        return $this->hasMany(AptitudeTestPayment::class, 'aptitude_test_fee_id');
-    }
+    // Note: Aptitude test payments are linked to applications, not directly to fees.
+    // Since we now have a single fee for all programs, payment statistics are
+    // calculated directly in the controller using the AptitudeTestPayment model.
 }
