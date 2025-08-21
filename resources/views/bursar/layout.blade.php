@@ -130,6 +130,11 @@
                                             <span class="sub-item">Aptitude Test Fee</span>
                                         </a>
                                     </li>
+                                    <li class="{{ request()->routeIs('bursar.school-fees.*') ? 'active' : '' }}">
+                                        <a href=" {{ route('bursar.school-fees.index') }}">
+                                            <span class="sub-item">School Fee Setup</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </li>
