@@ -9,16 +9,11 @@ use App\Http\Controllers\ApplicationFeeController;
 use App\Http\Controllers\AptitudeTestFeeController;
 use App\Http\Controllers\SchoolSessionController;
 use App\Http\Controllers\SemesterController;
+use App\Http\Controllers\LevelController;
+use App\Http\Controllers\CourseController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-// Route::get('/dashboard', function () {
-//     return view('dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class ,'index'])->name('dashboard');
 });
@@ -31,12 +26,10 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/', [ApplicationController::class, 'landing'])->name('application.landing');
 
-// Payment routes
 Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::get('/payment/success', function() { return view('payment.success'); })->name('payment.success');
 
-// Application routes
 Route::get('/application/apply/{tx_ref}', [ApplicationController::class, 'create'])->name('application.create');
 Route::post('/application/{tx_ref}', [ApplicationController::class, 'store'])->name('application.store');
 Route::get('/application/continue/{tx_ref}', [ApplicationController::class, 'continueApplication'])->name('application.continue');
@@ -45,12 +38,9 @@ Route::get('/application/printout/{application}', [ApplicationController::class,
 Route::get('/application/printout/{application}/download', [ApplicationController::class, 'downloadPrintout'])->name('application.downloadPrintout');
 
 Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(function () {
-   // Route::get('/dashboard', function () { return view('superadmin.dashboard'); })->name('superadmin.dashboard');
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('superadmin.dashboard');
    
-   // User Management Routes
    Route::get('/users', [UserManagementController::class, 'index'])->name('superadmin.users.index');
-
    Route::get('/users/create', [UserManagementController::class, 'create'])->name('superadmin.users.create');
    Route::post('/users', [UserManagementController::class, 'store'])->name('superadmin.users.store');
    Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('superadmin.users.show');
@@ -60,7 +50,6 @@ Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(func
    Route::post('/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('superadmin.users.reset-password');
    Route::post('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('superadmin.users.toggle-status');
    
-   // School Session Management Routes
    Route::resource('school-sessions', SchoolSessionController::class, [
        'names' => [
            'index' => 'superadmin.school-sessions.index',
@@ -74,7 +63,6 @@ Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(func
    ]);
    Route::patch('/school-sessions/{schoolSession}/set-current', [SchoolSessionController::class, 'setCurrent'])->name('superadmin.school-sessions.set-current');
    
-   // Semester Management Routes
    Route::resource('semesters', SemesterController::class, [
        'names' => [
            'index' => 'superadmin.semesters.index',
@@ -87,6 +75,30 @@ Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(func
        ]
    ]);
    Route::patch('/semesters/{semester}/set-current', [SemesterController::class, 'setCurrent'])->name('superadmin.semesters.set-current');
+   
+   Route::resource('levels', LevelController::class, [
+       'names' => [
+           'index' => 'superadmin.levels.index',
+           'create' => 'superadmin.levels.create',
+           'store' => 'superadmin.levels.store',
+           'show' => 'superadmin.levels.show',
+           'edit' => 'superadmin.levels.edit',
+           'update' => 'superadmin.levels.update',
+           'destroy' => 'superadmin.levels.destroy',
+       ]
+   ]);
+   
+   Route::resource('courses', CourseController::class, [
+       'names' => [
+           'index' => 'superadmin.courses.index',
+           'create' => 'superadmin.courses.create',
+           'store' => 'superadmin.courses.store',
+           'show' => 'superadmin.courses.show',
+           'edit' => 'superadmin.courses.edit',
+           'update' => 'superadmin.courses.update',
+           'destroy' => 'superadmin.courses.destroy',
+       ]
+   ]);
 });
 
 Route::prefix('college')->middleware(['auth', 'role:College Admin'])->group(function () {
@@ -107,7 +119,6 @@ Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () 
     Route::get('/transaction/{transaction}', [BursarController::class, 'showTransaction'])->name('bursar.transaction.show');
     Route::patch('/transaction/{transaction}/reconcile', [BursarController::class, 'reconcileTransaction'])->name('bursar.transaction.reconcile');
     
-    // Application Fee Management Routes
     Route::resource('application-fees', ApplicationFeeController::class, [
         'names' => [
             'index' => 'bursar.application-fees.index',
@@ -120,7 +131,6 @@ Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () 
         ]
     ]);
     
-    // Aptitude Test Fee Management Routes
     Route::resource('aptitude-test-fees', AptitudeTestFeeController::class, [
         'names' => [
             'index' => 'bursar.aptitude-test-fees.index',
