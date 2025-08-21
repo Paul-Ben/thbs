@@ -83,8 +83,8 @@ class SchoolFeeController extends Controller
     public function create()
     {
         $programmes = Programme::orderBy('name')->get();
-        $sessions = SchoolSession::orderBy('name')->get();
-        $semesters = Semester::orderBy('name')->get();
+        $sessions = SchoolSession::orderBy('session_name')->get();
+        $semesters = Semester::orderBy('semester_name')->get();
         $levels = Level::orderBy('name')->get();
 
         $feeTypes = [
@@ -100,7 +100,7 @@ class SchoolFeeController extends Controller
             'technology' => 'Technology Fee',
             'other' => 'Other Fee'
         ];
-
+        
         return view('bursar.school-fees.create', compact(
             'programmes', 'sessions', 'semesters', 'levels', 'feeTypes'
         ));
