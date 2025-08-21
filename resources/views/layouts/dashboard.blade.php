@@ -95,30 +95,43 @@
               
               @if(auth()->check() && auth()->user()->userRole === 'Superadmin')
               <!-- Superadmin Navigation -->
-              <li class="nav-section">
-                <span class="sidebar-mini-icon">
-                  <i class="fa fa-cog"></i>
-                </span>
-                <h4 class="text-section">Administration</h4>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('superadmin.users.index') }}">
-                  <i class="fas fa-users"></i>
-                  <p>User Management</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('superadmin.school-sessions.index') }}">
-                  <i class="fas fa-calendar-alt"></i>
-                  <p>School Sessions</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{ route('superadmin.semesters.index') }}">
-                  <i class="fas fa-calendar-week"></i>
-                  <p>Semesters</p>
-                </a>
-              </li>
+              <!-- Superadmin Navigation -->
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-cog"></i>
+              </span>
+              <h4 class="text-section">Administration</h4>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('superadmin.users.index') }}">
+                <i class="fas fa-users"></i>
+                <p>User Management</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('superadmin.school-sessions.index') }}">
+                <i class="fas fa-calendar-alt"></i>
+                <p>School Sessions</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('superadmin.semesters.index') }}">
+                <i class="fas fa-calendar-week"></i>
+                <p>Semesters</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('superadmin.levels.index') }}">
+                <i class="fas fa-layer-group"></i>
+                <p>Levels</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('superadmin.courses.index') }}">
+                <i class="fas fa-book"></i>
+                <p>Courses</p>
+              </a>
+            </li>
               @endif
               
               <li class="nav-section">
