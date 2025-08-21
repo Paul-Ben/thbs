@@ -6,6 +6,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BursarController;
 use App\Http\Controllers\ApplicationFeeController;
+use App\Http\Controllers\AptitudeTestFeeController;
 use App\Http\Controllers\SchoolSessionController;
 use App\Http\Controllers\SemesterController;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +119,21 @@ Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () 
             'destroy' => 'bursar.application-fees.destroy',
         ]
     ]);
+    
+    // Aptitude Test Fee Management Routes
+    Route::resource('aptitude-test-fees', AptitudeTestFeeController::class, [
+        'names' => [
+            'index' => 'bursar.aptitude-test-fees.index',
+            'create' => 'bursar.aptitude-test-fees.create',
+            'store' => 'bursar.aptitude-test-fees.store',
+            'show' => 'bursar.aptitude-test-fees.show',
+            'edit' => 'bursar.aptitude-test-fees.edit',
+            'update' => 'bursar.aptitude-test-fees.update',
+            'destroy' => 'bursar.aptitude-test-fees.destroy',
+        ]
+    ]);
+    Route::patch('aptitude-test-fees/{aptitudeTestFee}/toggle-status', [AptitudeTestFeeController::class, 'toggleStatus'])
+          ->name('bursar.aptitude-test-fees.toggle-status');
 });
 
 Route::prefix('it')->middleware(['auth', 'role:IT Admin'])->group(function () {
