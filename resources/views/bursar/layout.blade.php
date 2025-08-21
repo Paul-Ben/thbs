@@ -118,6 +118,12 @@
                                 <p>Application Fee Management</p>
                             </a>
                         </li>
+                        <li class="nav-item {{ request()->routeIs('bursar.aptitude-test-fees.*') ? 'active' : '' }}">
+                            <a href="{{ route('bursar.aptitude-test-fees.index') }}" class="collapsed" aria-expanded="false">
+                                <i class="fas fa-brain"></i>
+                                <p>Aptitude Test Fees</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="#" class="collapsed" aria-expanded="false">
                                 <i class="fas fa-university"></i>
