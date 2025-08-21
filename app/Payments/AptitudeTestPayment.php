@@ -5,6 +5,7 @@ namespace App\Payments;
 use App\Contracts\PaymentTypeInterface;
 use App\Models\Application;
 use App\Models\AptitudeTestPayment as AptitudeTestPaymentModel;
+use App\Models\AptitudeTestFee;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Exception;
@@ -44,9 +45,10 @@ class AptitudeTestPayment implements PaymentTypeInterface
             ]);
         }
 
+        $aptitudeTestFee = AptitudeTestFee::where('is_active', true)->firstOrFail();
 
         return [
-            'amount' => 5000,
+            'amount' => $aptitudeTestFee->amount,
             'title' => 'THBS Aptitude Test Fee - ' . $application->programme->name,
             'description' => "Aptitude test fee payment for {$application->programme->name} - {$application->applicant_surname} {$application->applicant_othernames}",
             'email' => $application->email,

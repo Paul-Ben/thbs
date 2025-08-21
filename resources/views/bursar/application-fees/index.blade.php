@@ -2,23 +2,24 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="page-inner">
-        <div class="page-header">
-            <h3 class="fw-bold mb-3">Application Fee Management</h3>
-            <ul class="breadcrumbs mb-3">
-                <li class="nav-home">
-                    <a href="{{ route('bursar.dashboard') }}">
-                        <i class="icon-home"></i>
-                    </a>
-                </li>
-                <li class="separator">
-                    <i class="icon-arrow-right"></i>
-                </li>
-                <li class="nav-item">
-                    <a href="#">Application Fees</a>
-                </li>
-            </ul>
+    <!-- <div class="page-inner"> -->
+    <div class="card py-0"> 
+        <div class="d-flex align-items-center ps-4" style="height: 80px;">
+            <div class="page-header mb-0">
+                <ul class="breadcrumbs mb-0">
+                    <li class="nav-home">
+                        <a href="{{ route('bursar.dashboard') }}"><i class="icon-home"></i></a>
+                    </li>
+                    <li class="separator"><i class="icon-arrow-right"></i></li>
+                    <li class="nav-item"><a href="{{ route('bursar.dashboard') }}">Dashboard</a></li>
+                    <li class="separator"><i class="icon-arrow-right"></i></li>
+                    <li class="nav-item"><a href="#">Fee Management</a></li>
+                    <li class="separator"><i class="icon-arrow-right"></i></li>
+                    <li class="nav-item"><a href="#">Application Fees</a></li>
+                </ul>
+            </div>
         </div>
+    </div>
 
         <div class="row">
             <div class="col-md-12">
@@ -104,7 +105,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        <!-- </div> -->
     </div>
 </div>
 @endsection

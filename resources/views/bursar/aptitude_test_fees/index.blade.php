@@ -4,6 +4,23 @@
 
 @section('content')
 <div class="container-fluid">
+<div class="card py-0"> 
+        <div class="d-flex align-items-center ps-4" style="height: 80px;">
+            <div class="page-header mb-0">
+                <ul class="breadcrumbs mb-0">
+                    <li class="nav-home">
+                        <a href="{{ route('bursar.dashboard') }}"><i class="icon-home"></i></a>
+                    </li>
+                    <li class="separator"><i class="icon-arrow-right"></i></li>
+                    <li class="nav-item"><a href="{{ route('bursar.dashboard') }}">Dashboard</a></li>
+                    <li class="separator"><i class="icon-arrow-right"></i></li>
+                    <li class="nav-item"><a href="#">Fee Management</a></li>
+                    <li class="separator"><i class="icon-arrow-right"></i></li>
+                    <li class="nav-item"><a href="#">Aptitude Test Fees</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-12">
             <div class="card">

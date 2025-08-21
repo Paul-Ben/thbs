@@ -112,23 +112,48 @@
                                 <p>Financial Reports</p>
                             </a>
                         </li>
-                        <li class="nav-item {{ request()->routeIs('bursar.application-fees.*') ? 'active' : '' }}">
-                            <a href="{{ route('bursar.application-fees.index') }}" class="collapsed" aria-expanded="false">
+                        <li class="nav-item {{ request()->routeIs('bursar.payments.*') ? 'active submenu' : '' }}">
+                            <a data-bs-toggle="collapse" href="#feePaymentSubmenu" class="collapsed" aria-expanded="{{ request()->routeIs('bursar.payments.*') ? 'true' : 'false' }}">
                                 <i class="fas fa-money-bill-wave"></i>
-                                <p>Application Fee Management</p>
+                                <p>Fee Management</p>
+                                <span class="caret"></span>
                             </a>
+                            <div class="collapse" id="feePaymentSubmenu">
+                                <ul class="nav nav-collapse">
+                                    <li class="{{ request()->routeIs('bursar.application-fees.*') ? 'active' : '' }}">
+                                        <a href=" {{ route('bursar.application-fees.index') }}">
+                                            <span class="sub-item">Application Fee</span>
+                                        </a>
+                                    </li>
+                                    <li class="{{ request()->routeIs('bursar.aptitude-test-fees.*') ? 'active' : '' }}">
+                                        <a href=" {{ route('bursar.aptitude-test-fees.index') }}">
+                                            <span class="sub-item">Aptitude Test Fee</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
-                        <li class="nav-item {{ request()->routeIs('bursar.aptitude-test-fees.*') ? 'active' : '' }}">
-                            <a href="{{ route('bursar.aptitude-test-fees.index') }}" class="collapsed" aria-expanded="false">
-                                <i class="fas fa-brain"></i>
-                                <p>Aptitude Test Fees</p>
+                        <li class="nav-item">
+                            <a href="tables/tables.html" class="collapsed" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                                <p>My Profile</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="collapsed" aria-expanded="false">
-                                <i class="fas fa-university"></i>
-                                <p>School Charges</p>
+                            <a data-bs-toggle="collapse" href="#tables">
+                                <i class="fas fa-cog"></i>
+                                <p>Settings</p>
+                                <span class="caret"></span>
                             </a>
+                            <div class="collapse" id="tables">
+                                <ul class="nav nav-collapse">
+                                    <li>
+                                        <a href="tables/datatables.html">
+                                            <span class="sub-item">Password Update</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </li>
                        
                     </ul>
