@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Constants\PaymentType;
-use App\Models\Application;
 
 class InitializePaymentRequest extends FormRequest
 {
@@ -43,28 +42,5 @@ class InitializePaymentRequest extends FormRequest
         }
 
         return $rules;
-    }
-
-    /**
-     * Handle data enrichment after validation passes
-     */
-    protected function passedValidation(): void
-    {
-        if ($this->payment_type === PaymentType::APTITUDE_TEST_FEE && $this->has('application_number')) {
-            $application = Application::where('application_number', $this->application_number)->first();
-            
-            if (!$application) {
-                throw new \Exception('Application not found with the provided application number.');
-            }
-
-            // Merge application data into the request
-            $this->merge([
-                'application_id' => $application->id,
-                'email' => $application->email,
-                'surname' => $application->applicant_surname,
-                'othernames' => $application->applicant_othernames,
-                'phone' => $application->phone ?? 'N/A',
-            ]);
-        }
     }
 }

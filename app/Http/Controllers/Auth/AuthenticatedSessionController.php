@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
             $user = auth()->user();
             $redirect = match ($user->userRole) {
                 'Superadmin' => route('superadmin.dashboard'),
-                'College Admin' => route('college.dashboard'),
+                'Department Admin' => route('department.dashboard'),
                 'Admission Officer' => route('admissions.dashboard'),
                 'Bursar' => route('bursar.dashboard'),
                 'IT Admin' => route('it.dashboard'),

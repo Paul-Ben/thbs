@@ -84,8 +84,8 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="fw-bold">College</label>
-                                    <p class="form-control-static">{{ $applicationFee->programme->college->name }}</p>
+                                    <label class="fw-bold">Department</label>
+                                    <p class="form-control-static">{{ $applicationFee->programme->department->name }}</p>
                                 </div>
                             </div>
                         </div>
@@ -141,7 +141,7 @@
                         
                         <div class="mb-3">
                             <h6><i class="fa fa-info-circle text-info"></i> Programme Information</h6>
-                            <p class="small mb-1"><strong>College:</strong> {{ $applicationFee->programme->college->name }}</p>
+                            <p class="small mb-1"><strong>Department:</strong> {{ $applicationFee->programme->department->name }}</p>
                             <p class="small mb-1"><strong>Programme ID:</strong> #{{ $applicationFee->programme->id }}</p>
                             <p class="small mb-1"><strong>Fee Status:</strong> <span class="badge badge-success">Active</span></p>
                         </div>

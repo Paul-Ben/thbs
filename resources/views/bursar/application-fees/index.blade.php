@@ -40,7 +40,7 @@
                                     <tr>
                                         <th>ID</th>
                                         <th>Programme</th>
-                                        <th>College</th>
+                                        <th>Department</th>
                                         <th>Level</th>
                                         <th>Amount (₦)</th>
                                         <th>Created At</th>

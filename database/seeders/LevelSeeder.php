@@ -56,7 +56,9 @@ class LevelSeeder extends Seeder
         $levelsCreated = 0;
 
         foreach ($levelData as $semesterLevels) {
-            
+
+            // Find the semester by name (case-insensitive). Column is 'semester_name'.
+
             $semester = $semesters->first(function ($sem) use ($semesterLevels) {
                 return stripos($sem->semester_name, str_replace(' Semester', '', $semesterLevels['semester_name'])) !== false;
             });
@@ -131,5 +133,6 @@ class LevelSeeder extends Seeder
         foreach ($allLevels->groupBy('semester.semester_name') as $semesterName => $levels) {
             $this->command->line("  {$semesterName}: " . $levels->pluck('name')->implode(', '));
         }
+
     }
 }

@@ -88,7 +88,7 @@
                                                 required>
                                             <option value="">Select Role</option>
                                             <option value="Superadmin" {{ old('userRole', $user->userRole) === 'Superadmin' ? 'selected' : '' }}>Superadmin</option>
-                                            <option value="College Admin" {{ old('userRole', $user->userRole) === 'College Admin' ? 'selected' : '' }}>College Admin</option>
+                                            <option value="Department Admin" {{ old('userRole', $user->userRole) === 'Department Admin' ? 'selected' : '' }}>Department Admin</option>
                                             <option value="Admission Officer" {{ old('userRole', $user->userRole) === 'Admission Officer' ? 'selected' : '' }}>Admission Officer</option>
                                         </select>
                                         @error('userRole')

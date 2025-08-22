@@ -17,7 +17,7 @@ class RoleAndPermissionSeeder extends Seeder
         // Create roles
         $roles = [
             'Superadmin',
-            'College Admin',
+            'Department Admin',
             'Admissions Officer',
             'Bursar',
             'IT Admin',
@@ -34,8 +34,8 @@ class RoleAndPermissionSeeder extends Seeder
             'edit user',
             'view user',
             'delete user',
-            'view college',
-            'edit college',
+            'view department',
+            'edit department',
             'view admissions',
             'edit admissions',
             'view finance',
@@ -53,11 +53,11 @@ class RoleAndPermissionSeeder extends Seeder
         $superAdminRole = Role::findByName('Superadmin');
         $superAdminRole->givePermissionTo(Permission::all());
 
-        $collegeAdminRole = Role::findByName('College Admin');
-        $collegeAdminRole->givePermissionTo([
+        $departmentAdminRole = Role::findByName('Department Admin');
+        $departmentAdminRole->givePermissionTo([
             'view dashboard',
-            'view college',
-            'edit college',
+            'view department',
+            'edit department',
         ]);
 
         $admissionsOfficerRole = Role::findByName('Admissions Officer');

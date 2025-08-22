@@ -12,7 +12,11 @@ use App\Http\Controllers\SchoolSessionController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\CourseController;
+
+use App\Http\Controllers\DepartmentController;
+
 use App\Http\Controllers\StudentController;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
@@ -89,6 +93,16 @@ Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(func
            'destroy' => 'superadmin.levels.destroy',
        ]
    ]);
+
+   Route::prefix('departments')->name('superadmin.departments.')->group(function () {
+       Route::get('/', [DepartmentController::class, 'index'])->name('index');
+       Route::get('/create', [DepartmentController::class, 'create'])->name('create');
+       Route::post('/', [DepartmentController::class, 'store'])->name('store');
+       Route::get('/{department}', [DepartmentController::class, 'show'])->name('show');
+       Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->name('edit');
+       Route::put('/{department}', [DepartmentController::class, 'update'])->name('update');
+       Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
+   });
    
    Route::resource('courses', CourseController::class, [
        'names' => [
@@ -103,8 +117,8 @@ Route::prefix('superadmin')->middleware(['auth', 'role:Superadmin'])->group(func
    ]);
 });
 
-Route::prefix('college')->middleware(['auth', 'role:College Admin'])->group(function () {
-    Route::get('/dashboard', function () { return view('college.dashboard'); })->name('college.dashboard');
+Route::prefix('department')->middleware(['auth', 'role:Department Admin'])->group(function () {
+    Route::get('/dashboard', function () { return view('department.dashboard'); })->name('department.dashboard');
 });
 
 Route::prefix('admissions')->middleware(['auth', 'role:Admission Officer'])->group(function () {
