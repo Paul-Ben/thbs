@@ -7,11 +7,16 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\BursarController;
 use App\Http\Controllers\ApplicationFeeController;
 use App\Http\Controllers\AptitudeTestFeeController;
+use App\Http\Controllers\SchoolFeeController;
 use App\Http\Controllers\SchoolSessionController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\CourseController;
+
 use App\Http\Controllers\DepartmentController;
+
+use App\Http\Controllers\StudentController;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApplicationController;
 
@@ -155,6 +160,19 @@ Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () 
     ]);
     Route::patch('aptitude-test-fees/{aptitudeTestFee}/toggle-status', [AptitudeTestFeeController::class, 'toggleStatus'])
           ->name('bursar.aptitude-test-fees.toggle-status');
+    
+    // School Fee Management Routes
+    Route::resource('school-fees', SchoolFeeController::class, [
+        'names' => [
+            'index' => 'bursar.school-fees.index',
+            'create' => 'bursar.school-fees.create',
+            'store' => 'bursar.school-fees.store',
+            'show' => 'bursar.school-fees.show',
+            'edit' => 'bursar.school-fees.edit',
+            'update' => 'bursar.school-fees.update',
+            'destroy' => 'bursar.school-fees.destroy',
+        ]
+    ]);
 });
 
 Route::prefix('it')->middleware(['auth', 'role:IT Admin'])->group(function () {
@@ -162,7 +180,30 @@ Route::prefix('it')->middleware(['auth', 'role:IT Admin'])->group(function () {
 });
 
 Route::prefix('student')->middleware(['auth', 'role:Student'])->group(function () {
-    Route::get('/dashboard', function () { return view('student.dashboard'); })->name('student.dashboard');
+    Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('student.dashboard');
+    
+    // Biodata routes
+    Route::get('/biodata', [StudentController::class, 'biodata'])->name('student.biodata');
+    Route::put('/biodata', [StudentController::class, 'updateBiodata'])->name('student.biodata.update');
+    Route::post('/biodata/photo', [StudentController::class, 'updatePhoto'])->name('student.biodata.photo');
+    
+    // Course registration routes
+    Route::get('/course-registration', [StudentController::class, 'courseRegistration'])->name('student.course-registration.current');
+    Route::post('/course-registration', [StudentController::class, 'storeCourseRegistration'])->name('student.course-registration.store');
+    Route::get('/course-registration/history', [StudentController::class, 'courseRegistrationHistory'])->name('student.course-registration.history');
+    
+    // Payment routes
+    Route::get('/payments/fees', [StudentController::class, 'feePayments'])->name('student.payments.fees');
+    Route::post('/payments/process', [StudentController::class, 'processPayment'])->name('student.payments.process');
+    Route::get('/payments/history', [StudentController::class, 'paymentHistory'])->name('student.payments.history');
+    Route::get('/payments/receipt/{payment}', [StudentController::class, 'paymentReceipt'])->name('student.payments.receipt');
+    
+    // Results routes
+    Route::get('/results', [StudentController::class, 'results'])->name('student.results');
+    Route::get('/results/{semester}', [StudentController::class, 'semesterResults'])->name('student.results.semester');
+    
+    // Support route
+    Route::get('/support', [StudentController::class, 'support'])->name('student.support');
 });
 
 require __DIR__.'/auth.php';

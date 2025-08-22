@@ -2,14 +2,17 @@
 
 namespace Database\Seeders;
 
+
 use Illuminate\Database\Seeder;
 use App\Models\Semester;
 use App\Models\SchoolSession;
+
 
 class SemesterSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+
      */
     public function run(): void
     {
@@ -42,3 +45,4 @@ class SemesterSeeder extends Seeder
         }
     }
 }
+

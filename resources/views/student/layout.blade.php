@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>BSUTH - Bursar Dashboard</title>
+    <title>BSUTH - Student Dashboard</title>
     <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
     <link rel="icon" href="{{ asset('assets/img/favicon_io/favicon.ico') }}" type="image/x-icon" />
     <!-- Fonts and icons -->
@@ -35,8 +35,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/demo.css') }}" />
     <!-- DataTables CSS -->
     <link rel="stylesheet" href="{{ asset('assets/js/plugin/datatables/datatables.min.css') }}">
-    {!! ToastMagic::styles() !!}
-
+    <!-- Toaster CSS -->
+    <link rel="stylesheet" href="{{ asset('vendor/devrabiul/laravel-toaster-magic/css/toaster-magic.css') }}">
 </head>
 
 <body>
@@ -46,9 +46,9 @@
             <div class="sidebar-logo">
                 <!-- Logo Header -->
                 <div class="logo-header" data-background-color="dark">
-                    <a href="{{ route('bursar.dashboard') }}" class="logo">
-                        <img src="{{ asset('assets/img/bsth-logo.jpeg') }}" alt="navbar brand" class="navbar-brand"
-                            height="50" />
+                    <a href="{{ route('student.dashboard') }}" class="logo">
+                        <img src="{{ asset('assets/img/bsth-logo.jpeg') }}" alt="navbar brand"
+                            class="navbar-brand" height="20" />
                     </a>
                     <div class="nav-toggle">
                         <button class="btn btn-toggle toggle-sidebar">
@@ -67,8 +67,8 @@
             <div class="sidebar-wrapper scrollbar scrollbar-inner">
                 <div class="sidebar-content">
                     <ul class="nav nav-secondary">
-                        <li class="nav-item active">
-                            <a href="{{ route('bursar.dashboard') }}" class="collapsed" aria-expanded="false">
+                        <li class="nav-item {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
+                            <a href="{{ route('student.dashboard') }}" class="collapsed" aria-expanded="false">
                                 <i class="fas fa-home"></i>
                                 <p>Dashboard</p>
                             </a>
@@ -77,90 +77,96 @@
                             <span class="sidebar-mini-icon">
                                 <i class="fa fa-ellipsis-h"></i>
                             </span>
-                            <h4 class="text-section">Financial Management</h4>
+                            <h4 class="text-section">Academic</h4>
                         </li>
-                        <li class="nav-item {{ request()->routeIs('bursar.payments.*') ? 'active submenu' : '' }}">
-                            <a data-bs-toggle="collapse" href="#paymentsSubmenu" class="collapsed" aria-expanded="{{ request()->routeIs('bursar.payments.*') ? 'true' : 'false' }}">
+                        <li class="nav-item {{ request()->routeIs('student.biodata.*') ? 'active' : '' }}">
+                            <a href="{{ route('student.biodata') }}" class="collapsed" aria-expanded="false">
+                                <i class="fas fa-user"></i>
+                                <p>My Biodata</p>
+                            </a>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('student.course-registration.*') ? 'active submenu' : '' }}">
+                            <a data-bs-toggle="collapse" href="#courseSubmenu" class="collapsed" aria-expanded="{{ request()->routeIs('student.course-registration.*') ? 'true' : 'false' }}">
+                                <i class="fas fa-book"></i>
+                                <p>Course Registration</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse {{ request()->routeIs('student.course-registration.*') ? 'show' : '' }}" id="courseSubmenu">
+                                <ul class="nav nav-collapse">
+                                    <li class="{{ request()->routeIs('student.course-registration.current') ? 'active' : '' }}">
+                                        <a href="{{ route('student.course-registration.current') }}">
+                                            <span class="sub-item">Current Registration</span>
+                                        </a>
+                                    </li>
+                                    <li class="{{ request()->routeIs('student.course-registration.history') ? 'active' : '' }}">
+                                        <a href="{{ route('student.course-registration.history') }}">
+                                            <span class="sub-item">Registration History</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('student.results.*') ? 'active' : '' }}">
+                            <a href="{{ route('student.results') }}" class="collapsed" aria-expanded="false">
+                                <i class="fas fa-chart-line"></i>
+                                <p>My Results</p>
+                            </a>
+                        </li>
+                        <li class="nav-section">
+                            <span class="sidebar-mini-icon">
+                                <i class="fa fa-ellipsis-h"></i>
+                            </span>
+                            <h4 class="text-section">Financial</h4>
+                        </li>
+                        <li class="nav-item {{ request()->routeIs('student.payments.*') ? 'active submenu' : '' }}">
+                            <a data-bs-toggle="collapse" href="#paymentsSubmenu" class="collapsed" aria-expanded="{{ request()->routeIs('student.payments.*') ? 'true' : 'false' }}">
                                 <i class="fas fa-credit-card"></i>
                                 <p>Payments</p>
                                 <span class="caret"></span>
                             </a>
-                            <div class="collapse {{ request()->routeIs('bursar.payments.*') ? 'show' : '' }}" id="paymentsSubmenu">
+                            <div class="collapse {{ request()->routeIs('student.payments.*') ? 'show' : '' }}" id="paymentsSubmenu">
                                 <ul class="nav nav-collapse">
-                                    <li class="{{ request()->routeIs('bursar.payments.application') ? 'active' : '' }}">
-                                        <a href="{{ route('bursar.payments.application') }}">
-                                            <span class="sub-item">Application Fees</span>
+                                    <li class="{{ request()->routeIs('student.payments.fees') ? 'active' : '' }}">
+                                        <a href="{{ route('student.payments.fees') }}">
+                                            <span class="sub-item">Pay Fees</span>
                                         </a>
                                     </li>
-                                    <li class="{{ request()->routeIs('bursar.payments.school') ? 'active' : '' }}">
-                                        <a href="#" onclick="alert('School Fees module coming soon!')">
-                                            <span class="sub-item">School Fees</span>
+                                    <li class="{{ request()->routeIs('student.payments.history') ? 'active' : '' }}">
+                                        <a href="{{ route('student.payments.history') }}">
+                                            <span class="sub-item">Payment History</span>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                         </li>
-                        <li class="nav-item {{ request()->routeIs('bursar.transactions') ? 'active' : '' }}">
-                            <a href="{{ route('bursar.transactions') }}" class="collapsed" aria-expanded="false">
-                                <i class="fas fa-history"></i>
-                                <p>Transaction History</p>
-                            </a>
+                        <li class="nav-section">
+                            <span class="sidebar-mini-icon">
+                                <i class="fa fa-ellipsis-h"></i>
+                            </span>
+                            <h4 class="text-section">Account</h4>
                         </li>
                         <li class="nav-item">
-                            <a href="#" class="collapsed" aria-expanded="false">
-                                <i class="fas fa-chart-bar"></i>
-                                <p>Financial Reports</p>
-                            </a>
-                        </li>
-                        <li class="nav-item {{ request()->routeIs('bursar.payments.*') ? 'active submenu' : '' }}">
-                            <a data-bs-toggle="collapse" href="#feePaymentSubmenu" class="collapsed" aria-expanded="{{ request()->routeIs('bursar.payments.*') ? 'true' : 'false' }}">
-                                <i class="fas fa-money-bill-wave"></i>
-                                <p>Fee Management</p>
-                                <span class="caret"></span>
-                            </a>
-                            <div class="collapse" id="feePaymentSubmenu">
-                                <ul class="nav nav-collapse">
-                                    <li class="{{ request()->routeIs('bursar.application-fees.*') ? 'active' : '' }}">
-                                        <a href=" {{ route('bursar.application-fees.index') }}">
-                                            <span class="sub-item">Application Fee</span>
-                                        </a>
-                                    </li>
-                                    <li class="{{ request()->routeIs('bursar.aptitude-test-fees.*') ? 'active' : '' }}">
-                                        <a href=" {{ route('bursar.aptitude-test-fees.index') }}">
-                                            <span class="sub-item">Aptitude Test Fee</span>
-                                        </a>
-                                    </li>
-                                    <li class="{{ request()->routeIs('bursar.school-fees.*') ? 'active' : '' }}">
-                                        <a href=" {{ route('bursar.school-fees.index') }}">
-                                            <span class="sub-item">School Fee Setup</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="nav-item">
-                            <a href="tables/tables.html" class="collapsed" aria-expanded="false">
-                                <i class="fas fa-user"></i>
+                            <a href="{{ route('profile.edit') }}" class="collapsed" aria-expanded="false">
+                                <i class="fas fa-user-cog"></i>
                                 <p>My Profile</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a data-bs-toggle="collapse" href="#tables">
+                            <a data-bs-toggle="collapse" href="#settings">
                                 <i class="fas fa-cog"></i>
                                 <p>Settings</p>
                                 <span class="caret"></span>
                             </a>
-                            <div class="collapse" id="tables">
+                            <div class="collapse" id="settings">
                                 <ul class="nav nav-collapse">
                                     <li>
-                                        <a href="tables/datatables.html">
-                                            <span class="sub-item">Password Update</span>
+                                        <a href="{{ route('profile.edit') }}">
+                                            <span class="sub-item">Change Password</span>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                         </li>
-                       
                     </ul>
                 </div>
             </div>
@@ -172,7 +178,7 @@
                 <div class="main-header-logo">
                     <!-- Logo Header -->
                     <div class="logo-header" data-background-color="dark">
-                        <a href="{{ route('bursar.dashboard') }}" class="logo">
+                        <a href="{{ route('student.dashboard') }}" class="logo">
                             <img src="{{ asset('assets/img/bsth-logo.jpeg') }}" alt="navbar brand"
                                 class="navbar-brand" height="20" />
                         </a>
@@ -207,11 +213,11 @@
                         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
                             <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
                                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
-                                    aria-haspopup="true" aria-expanded="false">
+                                    aria-expanded="false" aria-haspopup="true">
                                     <i class="fa fa-search"></i>
                                 </a>
                                 <ul class="dropdown-menu dropdown-search animated fadeIn">
-                                    <form class="navbar-form">
+                                    <form class="navbar-left navbar-form nav-search">
                                         <div class="input-group">
                                             <input type="text" placeholder="Search ..." class="form-control" />
                                         </div>
@@ -239,8 +245,8 @@
                                                         <img src="{{ asset('assets/img/jm_denis.jpg') }}" alt="Img Profile" />
                                                     </div>
                                                     <div class="notif-content">
-                                                        <span class="subject">Financial Report</span>
-                                                        <span class="block"> Monthly revenue report is ready </span>
+                                                        <span class="subject">Academic Office</span>
+                                                        <span class="block"> Course registration is now open </span>
                                                         <span class="time">5 minutes ago</span>
                                                     </div>
                                                 </a>
@@ -262,19 +268,17 @@
                                 </a>
                                 <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
                                     <li>
-                                        <div class="dropdown-title">
-                                            You have 4 new notifications
-                                        </div>
+                                        <div class="dropdown-title">You have 4 new notifications</div>
                                     </li>
                                     <li>
                                         <div class="notif-scroll scrollbar-outer">
                                             <div class="notif-center">
                                                 <a href="#">
                                                     <div class="notif-icon notif-primary">
-                                                        <i class="fa fa-credit-card"></i>
+                                                        <i class="fa fa-user-plus"></i>
                                                     </div>
                                                     <div class="notif-content">
-                                                        <span class="block"> New payment received </span>
+                                                        <span class="block"> New course available for registration </span>
                                                         <span class="time">5 minutes ago</span>
                                                     </div>
                                                 </a>
@@ -283,7 +287,7 @@
                                                         <i class="fa fa-comment"></i>
                                                     </div>
                                                     <div class="notif-content">
-                                                        <span class="block"> Monthly report generated </span>
+                                                        <span class="block"> Payment successful </span>
                                                         <span class="time">12 minutes ago</span>
                                                     </div>
                                                 </a>
@@ -301,12 +305,12 @@
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
                                     aria-expanded="false">
                                     <div class="avatar-sm">
-                                        <img src="{{ asset('assets/img/profile2.jpg') }}" alt="..."
+                                        <img src="{{ asset('assets/img/profile.jpg') }}" alt="..."
                                             class="avatar-img rounded-circle" />
                                     </div>
                                     <span class="profile-username">
                                         <span class="op-7">Hi,</span>
-                                        <span class="fw-bold">{{ $authUser->name ?? 'Bursar' }}</span>
+                                        <span class="fw-bold">{{ Auth::user()->name }}</span>
                                     </span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -314,13 +318,14 @@
                                         <li>
                                             <div class="user-box">
                                                 <div class="avatar-lg">
-                                                    <img src="{{ asset('assets/img/profile2.jpg') }}" alt="image profile"
+                                                    <img src="{{ asset('assets/img/profile.jpg') }}" alt="image profile"
                                                         class="avatar-img rounded" />
                                                 </div>
                                                 <div class="u-text">
-                                                    <h4>{{ $authUser->name ?? 'Bursar' }}</h4>
-                                                    <p class="text-muted">{{ $authUser->email ?? 'bursar@example.com' }}</p>
-                                                    <a href="{{ route('profile.edit') }}" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                                    <h4>{{ Auth::user()->name }}</h4>
+                                                    <p class="text-muted">{{ Auth::user()->email }}</p>
+                                                    <a href="{{ route('profile.edit') }}"
+                                                        class="btn btn-xs btn-secondary btn-sm">View Profile</a>
                                                 </div>
                                             </div>
                                         </li>
@@ -330,8 +335,7 @@
                                             <div class="dropdown-divider"></div>
                                             <form method="POST" action="{{ route('logout') }}">
                                                 @csrf
-                                                <a class="dropdown-item" href="#"
-                                                    onclick="event.preventDefault(); this.closest('form').submit();">Logout</a>
+                                                <button type="submit" class="dropdown-item">Logout</button>
                                             </form>
                                         </li>
                                     </div>
@@ -366,7 +370,7 @@
                     </nav>
                     <div class="copyright">
                         2024, made with <i class="fa fa-heart heart text-danger"></i> by
-                        <a href="#">BSUTH IT Department</a>
+                        <a href="#">BSUTH IT Team</a>
                     </div>
                     <div>
                         Distributed by
@@ -375,70 +379,8 @@
                 </div>
             </footer>
         </div>
-
-        <!-- Custom template | don't include it in your project! -->
-        <div class="custom-template">
-            <div class="title">Settings</div>
-            <div class="custom-content">
-                <div class="switcher">
-                    <div class="switch-block">
-                        <h4>Logo Header</h4>
-                        <div class="btnSwitch">
-                            <button type="button" class="selected changeLogoHeaderColor" data-color="dark"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="blue"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="purple"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="light-blue"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="green"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="orange"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="red"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="white"></button>
-                            <br />
-                            <button type="button" class="changeLogoHeaderColor" data-color="dark2"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="blue2"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="purple2"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="light-blue2"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="green2"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="orange2"></button>
-                            <button type="button" class="changeLogoHeaderColor" data-color="red2"></button>
-                        </div>
-                    </div>
-                    <div class="switch-block">
-                        <h4>Navbar Header</h4>
-                        <div class="btnSwitch">
-                            <button type="button" class="changeTopBarColor" data-color="dark"></button>
-                            <button type="button" class="changeTopBarColor" data-color="blue"></button>
-                            <button type="button" class="changeTopBarColor" data-color="purple"></button>
-                            <button type="button" class="changeTopBarColor" data-color="light-blue"></button>
-                            <button type="button" class="changeTopBarColor" data-color="green"></button>
-                            <button type="button" class="changeTopBarColor" data-color="orange"></button>
-                            <button type="button" class="changeTopBarColor" data-color="red"></button>
-                            <button type="button" class="selected changeTopBarColor" data-color="white"></button>
-                            <br />
-                            <button type="button" class="changeTopBarColor" data-color="dark2"></button>
-                            <button type="button" class="changeTopBarColor" data-color="blue2"></button>
-                            <button type="button" class="changeTopBarColor" data-color="purple2"></button>
-                            <button type="button" class="changeTopBarColor" data-color="light-blue2"></button>
-                            <button type="button" class="changeTopBarColor" data-color="green2"></button>
-                            <button type="button" class="changeTopBarColor" data-color="orange2"></button>
-                            <button type="button" class="changeTopBarColor" data-color="red2"></button>
-                        </div>
-                    </div>
-                    <div class="switch-block">
-                        <h4>Sidebar</h4>
-                        <div class="btnSwitch">
-                            <button type="button" class="selected changeSideBarColor" data-color="white"></button>
-                            <button type="button" class="changeSideBarColor" data-color="dark"></button>
-                            <button type="button" class="changeSideBarColor" data-color="dark2"></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="custom-toggle">
-                <i class="icon-settings"></i>
-            </div>
-        </div>
-        <!-- End Custom template -->
     </div>
+
     <!--   Core JS Files   -->
     <script src="{{ asset('assets/js/core/jquery-3.7.1.min.js') }}"></script>
     <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
@@ -472,15 +414,10 @@
     <!-- Kaiadmin JS -->
     <script src="{{ asset('assets/js/kaiadmin.min.js') }}"></script>
 
-    <!-- Kaiadmin DEMO methods, don't include it in your project! -->
-    <script src="{{ asset('assets/js/setting-demo.js') }}"></script>
-    <script src="{{ asset('assets/js/demo.js') }}"></script>
-    {!! ToastMagic::scripts() !!}
-    <script>
-        $(document).ready(function() {
-            $("#basic-datatables").DataTable({});
-        });
-    </script>
+    <!-- Toaster JS -->
+    <script src="{{ asset('vendor/devrabiul/laravel-toaster-magic/js/toaster-magic.js') }}"></script>
+
+    @stack('scripts')
 </body>
 
 </html>

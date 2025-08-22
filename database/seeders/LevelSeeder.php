@@ -14,6 +14,8 @@ class LevelSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->info('Starting LevelSeeder...');
+        
         // Get existing semesters to create realistic relationships
         $semesters = Semester::all();
 
@@ -22,6 +24,8 @@ class LevelSeeder extends Seeder
             $this->command->warn('Please ensure semesters table has data before running this seeder.');
             return;
         }
+
+        $this->command->info('Available semesters: ' . $semesters->pluck('semester_name')->implode(', '));
 
         // Sample academic levels for different semester types
         $levelData = [
@@ -47,30 +51,30 @@ class LevelSeeder extends Seeder
                     ['name' => '500 Level', 'description' => 'Fifth year students - Professional level (for 5-year programs)'],
                 ]
             ],
-            // For Summer Semester (if exists)
-            [
-                'semester_name' => 'Summer Semester',
-                'levels' => [
-                    ['name' => '100 Level', 'description' => 'First year students - Foundation level'],
-                    ['name' => '200 Level', 'description' => 'Second year students - Intermediate level'],
-                    ['name' => '300 Level', 'description' => 'Third year students - Advanced level'],
-                    ['name' => '400 Level', 'description' => 'Fourth year students - Final year level'],
-                ]
-            ]
         ];
 
         $levelsCreated = 0;
 
         foreach ($levelData as $semesterLevels) {
+
             // Find the semester by name (case-insensitive). Column is 'semester_name'.
+
             $semester = $semesters->first(function ($sem) use ($semesterLevels) {
                 return stripos($sem->semester_name, str_replace(' Semester', '', $semesterLevels['semester_name'])) !== false;
             });
 
-            // If semester not found, use the first available semester
+           
             if (!$semester) {
-                $semester = $semesters->first();
+                $semester = $semesters->where('semester_name', $semesterLevels['semester_name'])->first();
             }
+
+         
+            if (!$semester) {
+                $this->command->warn("Semester '{$semesterLevels['semester_name']}' not found, skipping.");
+                continue;
+            }
+
+            $this->command->info("Creating levels for semester: {$semester->semester_name}");
 
             foreach ($semesterLevels['levels'] as $levelInfo) {
                 // Check if level already exists for this semester
@@ -86,11 +90,14 @@ class LevelSeeder extends Seeder
                         'updated_at' => now(),
                     ]);
                     $levelsCreated++;
+                    $this->command->info("Created level: {$levelInfo['name']} for {$semester->semester_name}");
+                } else {
+                    $this->command->info("Level {$levelInfo['name']} already exists for {$semester->semester_name}");
                 }
             }
         }
 
-        // Create additional specialized levels if needed
+       
         $specializedLevels = [
             ['name' => 'Pre-Degree', 'description' => 'Preparatory program for university admission'],
             ['name' => 'Remedial', 'description' => 'Remedial program for academic improvement'],
@@ -98,6 +105,8 @@ class LevelSeeder extends Seeder
         ];
 
         $firstSemester = $semesters->first();
+        $this->command->info("Creating specialized levels for: {$firstSemester->semester_name}");
+        
         foreach ($specializedLevels as $specialLevel) {
             $existingLevel = Level::where('semester_id', $firstSemester->id)
                 ->where('name', $specialLevel['name'])
@@ -111,7 +120,18 @@ class LevelSeeder extends Seeder
                     'updated_at' => now(),
                 ]);
                 $levelsCreated++;
+                $this->command->info("Created specialized level: {$specialLevel['name']}");
             }
+        }
+
+        $this->command->info("Level seeder completed successfully! Created {$levelsCreated} new level records.");
+        $this->command->info('Total levels in database: ' . Level::count());
+        
+        // Show what levels were created
+        $allLevels = Level::with('semester')->get();
+        $this->command->info('Levels by semester:');
+        foreach ($allLevels->groupBy('semester.semester_name') as $semesterName => $levels) {
+            $this->command->line("  {$semesterName}: " . $levels->pluck('name')->implode(', '));
         }
 
     }

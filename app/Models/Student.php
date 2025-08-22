@@ -46,6 +46,11 @@ class Student extends Model
         return $this->hasMany(CourseRegistration::class);
     }
 
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
+    }
+
     public function results()
     {
         return $this->hasMany(Result::class);
