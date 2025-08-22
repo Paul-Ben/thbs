@@ -74,4 +74,12 @@ class SchoolFee extends Model
     {
         return $query->where('fee_type', $type);
     }
+
+    /**
+     * Get the payments for this school fee.
+     */
+    public function payments()
+    {
+        return $this->hasMany(SchoolFeePayment::class);
+    }
 }
