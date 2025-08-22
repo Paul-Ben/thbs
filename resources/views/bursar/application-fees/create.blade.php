@@ -43,7 +43,7 @@
                                             <option value="">Select Programme</option>
                                             @foreach($programmes as $programme)
                                                 <option value="{{ $programme->id }}" {{ old('programme_id') == $programme->id ? 'selected' : '' }}>
-                                                    {{ $programme->name }} ({{ $programme->level }}) - {{ $programme->college->name }}
+                                                    {{ $programme->name }} ({{ $programme->level }}) - {{ $programme->department->name }}
                                                 </option>
                                             @endforeach
                                         </select>
