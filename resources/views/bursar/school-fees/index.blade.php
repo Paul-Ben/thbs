@@ -60,7 +60,7 @@
                                     @foreach($sessions as $session)
                                         <option value="{{ $session->id }}" 
                                                 {{ request('session_id') == $session->id ? 'selected' : '' }}>
-                                            {{ $session->name }}
+                                            {{ $session->session_name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -72,7 +72,7 @@
                                     @foreach($semesters as $semester)
                                         <option value="{{ $semester->id }}" 
                                                 {{ request('semester_id') == $semester->id ? 'selected' : '' }}>
-                                            {{ $semester->name }}
+                                            {{ $semester->semester_name }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -160,11 +160,11 @@
                                             <span class="badge badge-secondary">{{ ucfirst($fee->fee_type) }}</span>
                                         </td>
                                         <td>
-                                            <span class="fw-bold text-success">₦{{ number_format($fee->amount, 2) }}</span>
+                                            <span class="fw-bold text-success">{{ $fee->currency }} {{ number_format($fee->amount, 2) }}</span>
                                         </td>
                                         <td>
-                                            <span class="badge {{ $fee->status == 'active' ? 'badge-success' : 'badge-warning' }}">
-                                                {{ ucfirst($fee->status) }}
+                                            <span class="badge {{ $fee->is_active ? 'badge-success' : 'badge-warning' }}">
+                                                {{ $fee->is_active ? 'Active' : 'Inactive' }}
                                             </span>
                                         </td>
                                         <td>{{ $fee->created_at->format('M d, Y') }}</td>
