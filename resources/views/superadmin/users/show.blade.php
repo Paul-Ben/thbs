@@ -63,7 +63,7 @@
                                 <div class="form-group">
                                     <label class="form-label fw-bold">User Role</label>
                                     <p class="form-control-static">
-                                        <span class="badge badge-{{ $user->userRole === 'Superadmin' ? 'danger' : ($user->userRole === 'College Admin' ? 'warning' : 'info') }} badge-lg">
+                                        <span class="badge badge-{{ $user->userRole === 'Superadmin' ? 'danger' : ($user->userRole === 'Department Admin' ? 'warning' : 'info') }} badge-lg">
                                             {{ $user->userRole }}
                                         </span>
                                     </p>

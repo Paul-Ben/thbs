@@ -86,7 +86,7 @@
                                                 required>
                                             <option value="">Select Role</option>
                                             <option value="Superadmin" {{ old('userRole') === 'Superadmin' ? 'selected' : '' }}>Superadmin</option>
-                                            <option value="College Admin" {{ old('userRole') === 'College Admin' ? 'selected' : '' }}>College Admin</option>
+                                            <option value="Department Admin" {{ old('userRole') === 'Department Admin' ? 'selected' : '' }}>Department Admin</option>
                                             <option value="Admission Officer" {{ old('userRole') === 'Admission Officer' ? 'selected' : '' }}>Admission Officer</option>
                                         </select>
                                         @error('userRole')
@@ -160,8 +160,8 @@
                             <small class="text-muted">Full system access including user management, system settings, and all administrative functions.</small>
                         </div>
                         <div class="mb-3">
-                            <h6 class="text-warning">College Admin</h6>
-                            <small class="text-muted">Administrative access to college-specific functions, student management, and academic operations.</small>
+                            <h6 class="text-warning">Department Admin</h6>
+                            <small class="text-muted">Administrative access to department-specific functions, student management, and academic operations.</small>
                         </div>
                         <div class="mb-3">
                             <h6 class="text-info">Admission Officer</h6>

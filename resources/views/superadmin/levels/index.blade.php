@@ -96,6 +96,7 @@
                             {{ $levels->links() }}
                         </div>
                     @endif
+                    
                 </div>
             </div>
         </div>

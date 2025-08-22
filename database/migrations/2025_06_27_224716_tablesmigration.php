@@ -11,17 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('colleges', function (Blueprint $table) {
+        Schema::create('departments', function (Blueprint $table) {
             $table->id();
+            $table->string('code');
             $table->string('name')->unique();
-            $table->timestamps();
-        });
-
-        Schema::create('programmes', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('level');
-            $table->foreignId('college_id')->constrained();
             $table->timestamps();
         });
 
@@ -53,6 +46,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('semester_id')->constrained();
             $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('programmes', function (Blueprint $table) {
+            $table->id();
+            $table->string('code');
+            $table->string('name');
+            $table->foreignId('level_id')->constrained();
+            $table->foreignId('department_id')->constrained();
             $table->timestamps();
         });
 
@@ -152,15 +154,17 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('colleges');
-        Schema::dropIfExists('programmes');
-        Schema::dropIfExists('school_sessions');
-        Schema::dropIfExists('application_sessions');
-        Schema::dropIfExists('semesters');
+        // Drop in reverse dependency order
+        Schema::dropIfExists('results');
+        Schema::dropIfExists('course_registrations');
+        Schema::dropIfExists('students');
         Schema::dropIfExists('courses');
         Schema::dropIfExists('applications');
-        Schema::dropIfExists('students');
-        Schema::dropIfExists('course_registrations');
-        Schema::dropIfExists('results');
+        Schema::dropIfExists('programmes');
+        Schema::dropIfExists('levels');
+        Schema::dropIfExists('semesters');
+        Schema::dropIfExists('application_sessions');
+        Schema::dropIfExists('school_sessions');
+        Schema::dropIfExists('departments');
     }
 };

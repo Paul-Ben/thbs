@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Programme extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'level', 'college_id'];
+    protected $fillable = ['code', 'name', 'level', 'department_id'];
 
-    public function college()
+    public function department()
     {
-        return $this->belongsTo(College::class);
+        return $this->belongsTo(Department::class);
     }
 
     public function courses()

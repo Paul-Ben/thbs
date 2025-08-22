@@ -21,8 +21,8 @@ class RedirectBasedOnRole
 
             if ($user->hasRole('Superadmin')) {
                 return redirect()->intended('/superadmin/dashboard');
-            } elseif ($user->hasRole('College Admin')) {
-                return redirect()->intended('/collegeadmin/dashboard');
+            } elseif ($user->hasRole('Department Admin')) {
+                return redirect()->intended('/department/dashboard');
             } elseif ($user->hasRole('Admissions Officer')) {
                 return redirect()->intended('/admissions/dashboard');
             } elseif ($user->hasRole('Bursar')) {

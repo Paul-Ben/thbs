@@ -54,7 +54,7 @@
                                             <td>{{ $user->email }}</td>
                                             <td>
                                                 @php
-                                                    $roleClass = $user->userRole === 'Superadmin' ? 'danger' : ($user->userRole === 'College Admin' ? 'warning' : 'info');
+                                                    $roleClass = $user->userRole === 'Superadmin' ? 'danger' : ($user->userRole === 'Department Admin' ? 'warning' : 'info');
                                                 @endphp
                                                 <span class="badge badge-{{ $roleClass }}">{{ $user->userRole }}</span>
                                             </td>

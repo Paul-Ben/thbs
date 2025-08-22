@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Programme;
+use App\Models\Level;
 class ProgrammeSeeder extends Seeder
 { 
     /**
@@ -12,21 +13,35 @@ class ProgrammeSeeder extends Seeder
      */
     public function run(): void
     {
+        // Resolve Level IDs by name. Fallback to the first available level if not found.
+        $level100 = Level::where('name', 'like', '100%')->first();
+        $level200 = Level::where('name', 'like', '200%')->first();
+        $fallback = Level::first();
+
         Programme::insert([
             [
+                'code'       => 'NRS',
                 'name'       => 'Nursing',
-                'level'      => '100',
-                'college_id' => 1,  
+                'level_id'   => optional($level100 ?: $fallback)->id,
+                'department_id' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
+                'code'       => 'MLS',
                 'name'       => 'Medical Laboratory Science',
-                'level'      => '200',
-                'college_id' => 2,  
+                'level_id'   => optional($level200 ?: $fallback)->id,
+                'department_id' => 2,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
             [
+                'code'       => 'ANAT',
                 'name'       => 'Anatomy',
-                'level'      => '100',
-                'college_id' => 3,  
+                'level_id'   => optional($level100 ?: $fallback)->id,
+                'department_id' => 3,
+                'created_at' => now(),
+                'updated_at' => now(),
             ],
         ]);
     }
