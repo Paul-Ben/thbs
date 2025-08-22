@@ -99,7 +99,7 @@
                             <h6><i class="fa fa-graduation-cap text-primary"></i> Programme Details</h6>
                             <p class="mb-1"><strong>Name:</strong> {{ $applicationFee->programme->name }}</p>
                             <p class="mb-1"><strong>Level:</strong> <span class="badge badge-info">{{ $applicationFee->programme->level }}</span></p>
-                            <p class="mb-1"><strong>College:</strong> {{ $applicationFee->programme->college->name }}</p>
+                            <p class="mb-1"><strong>Department:</strong> {{ $applicationFee->programme->department->name }}</p>
                         </div>
                         
                         <div class="mb-3">

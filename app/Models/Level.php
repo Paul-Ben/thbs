@@ -11,6 +11,11 @@ class Level extends Model
     protected $fillable = [
         'semester_id',
         'name',
+        'is_current',
+    ];
+
+    protected $casts = [
+        'is_current' => 'boolean',
     ];
 
     /**

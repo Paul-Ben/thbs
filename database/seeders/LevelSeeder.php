@@ -62,9 +62,9 @@ class LevelSeeder extends Seeder
         $levelsCreated = 0;
 
         foreach ($levelData as $semesterLevels) {
-            // Find the semester by name (case-insensitive)
+            // Find the semester by name (case-insensitive). Column is 'semester_name'.
             $semester = $semesters->first(function ($sem) use ($semesterLevels) {
-                return stripos($sem->name, str_replace(' Semester', '', $semesterLevels['semester_name'])) !== false;
+                return stripos($sem->semester_name, str_replace(' Semester', '', $semesterLevels['semester_name'])) !== false;
             });
 
             // If semester not found, use the first available semester
@@ -114,7 +114,5 @@ class LevelSeeder extends Seeder
             }
         }
 
-        $this->command->info("Level seeder completed successfully! Created {$levelsCreated} new level records.");
-        $this->command->info('Total levels in database: ' . Level::count());
     }
 }

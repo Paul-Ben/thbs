@@ -28,7 +28,7 @@ class ApplicationController extends Controller
     {
         $programmes = Programme::with('applicationFees')->get();
 
-        $aptitudeTestFee = AptitudeTestFee::where('is_active', true)->firstOrFail();
+        $aptitudeTestFee = AptitudeTestFee::where('is_active', true)->first();
 
         return view('application.landing', compact('programmes', 'aptitudeTestFee'));
     }

@@ -116,7 +116,7 @@
             </li>
             <li class="nav-item">
               <a href="{{ route('superadmin.semesters.index') }}">
-                <i class="fas fa-calendar-week"></i>
+                <i class="fas fa-clock"></i>
                 <p>Semesters</p>
               </a>
             </li>
@@ -130,6 +130,12 @@
               <a href="{{ route('superadmin.courses.index') }}">
                 <i class="fas fa-book"></i>
                 <p>Courses</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ route('superadmin.departments.index') }}">
+                <i class="fas fa-university"></i>
+                <p>Departments</p>
               </a>
             </li>
               @endif

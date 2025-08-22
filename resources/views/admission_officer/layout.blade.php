@@ -185,7 +185,7 @@
                                     </li>
                                     <li>
                                         <a href="tables/datatables.html">
-                                            <span class="sub-item">Passord Update</span>
+                                            <span class="sub-item">Password Update</span>
                                         </a>
                                     </li>
                                 </ul>
