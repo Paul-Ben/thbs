@@ -26,7 +26,7 @@ class ApplicationFeeController extends Controller
     public function create()
     {
         $authUser = Auth::user();
-        $programmes = Programme::with('college')->get();
+        $programmes = Programme::with('department')->get();
         return view('bursar.application-fees.create', compact('authUser', 'programmes'));
     }
 
