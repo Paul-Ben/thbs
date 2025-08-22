@@ -232,7 +232,7 @@ class StudentController extends Controller
         // Get available courses for current level and semester
         $availableCourses = Course::where('programme_id', $student->programme_id)
             ->whereHas('level', function($query) use ($student) {
-                $query->where('name', $student->current_level ?? '100 Level');
+                $query->where('id', $student->level_id ?? 'Level not set');
             })
             ->whereHas('semester', function($query) {
                 $query->where('is_current', true);
