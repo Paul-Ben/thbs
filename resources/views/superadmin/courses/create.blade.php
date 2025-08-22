@@ -144,7 +144,7 @@
                                     </select>
                                     @error('semester_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
