@@ -52,7 +52,7 @@
                                         <tr>
                                             <td>{{ $fee->id }}</td>
                                             <td>{{ $fee->programme->name }}</td>
-                                            <td>{{ $fee->programme->college->name }}</td>
+                                            <td>{{ $fee->programme->department->name }}</td>
                                             <td>
                                                 <span class="badge badge-info">{{ $fee->programme->level }}</span>
                                             </td>
