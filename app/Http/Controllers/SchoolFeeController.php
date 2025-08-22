@@ -236,11 +236,13 @@ class SchoolFeeController extends Controller
     {
         try {
             // Check if there are any payments associated with this fee
-            // You might want to add this check if you have a school_fee_payments table
-            $hasPayments = $schoolFee->payments()->exists();
-            if ($hasPayments) {
-                return back()->withErrors(['error' => 'Cannot delete school fee that has associated payments.']);
-            }
+            // Only check if the school_fee_id column exists in the payments table
+          
+                $hasPayments = $schoolFee->payments()->exists();
+                if ($hasPayments) {
+                    return back()->withErrors(['error' => 'Cannot delete school fee that has associated payments.']);
+                }
+         
 
             $schoolFee->delete();
 
