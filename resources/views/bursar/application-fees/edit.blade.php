@@ -45,7 +45,7 @@
                                             @foreach($programmes as $programme)
                                                 <option value="{{ $programme->id }}" 
                                                     {{ (old('programme_id', $applicationFee->programme_id) == $programme->id) ? 'selected' : '' }}>
-                                                    {{ $programme->name }} ({{ $programme->level }}) - {{ $programme->college->name }}
+                                                    {{ $programme->name }} ({{ $programme->level }}) - {{ $programme->department->name }}
                                                 </option>
                                             @endforeach
                                         </select>
@@ -106,7 +106,7 @@
                             <h6><i class="fa fa-money-bill-wave text-success"></i> Current Fee</h6>
                             <p class="mb-1"><strong>Amount:</strong> <span class="text-success fw-bold">₦{{ number_format($applicationFee->amount, 2) }}</span></p>
                             <p class="mb-1"><strong>Created:</strong> {{ $applicationFee->created_at->format('M d, Y') }}</p>
-                            <p class="mb-1"><strong>Last Updated:</strong> {{ $applicationFee->updated_at->format('M d, Y') }}</p>
+                            {{-- <p class="mb-1"><strong>Last Updated:</strong> {{ $applicationFee->updated_at->format('M d, Y') ?? " "}}</p> --}}
                         </div>
                         
                         <div class="mb-3">
