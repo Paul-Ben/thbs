@@ -59,7 +59,7 @@ class ApplicationFeeController extends Controller
     public function show(ApplicationFee $applicationFee)
     {
         $authUser = Auth::user();
-        $applicationFee->load('programme.college');
+        $applicationFee->load('programme.department');
         return view('bursar.application-fees.show', compact('authUser', 'applicationFee'));
     }
 
@@ -69,8 +69,8 @@ class ApplicationFeeController extends Controller
     public function edit(ApplicationFee $applicationFee)
     {
         $authUser = Auth::user();
-        $programmes = Programme::with('college')->get();
-        $applicationFee->load('programme.college');
+        $programmes = Programme::with('department')->get();
+        $applicationFee->load('programme.department');
         return view('bursar.application-fees.edit', compact('authUser', 'applicationFee', 'programmes'));
     }
 
