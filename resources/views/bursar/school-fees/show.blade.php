@@ -294,6 +294,13 @@
                                 <a href="{{ route('bursar.school-fees.create') }}" class="btn btn-success btn-sm">
                                     <i class="fa fa-plus"></i> Add New Fee
                                 </a>
+                                <form action="{{ route('bursar.school-fees.destroy', $schoolFee) }}" method="POST" class="mt-2" onsubmit="return confirm('Are you sure you want to delete this school fee? This action cannot be undone and will remove all associated payment records.')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm w-100">
+                                        <i class="fa fa-trash"></i> Delete This Fee
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
