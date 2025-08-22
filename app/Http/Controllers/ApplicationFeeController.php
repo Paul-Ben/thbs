@@ -16,7 +16,7 @@ class ApplicationFeeController extends Controller
     public function index()
     {
         $authUser = Auth::user();
-        $applicationFees = ApplicationFee::with('programme.college')->paginate(15);
+        $applicationFees = ApplicationFee::with('programme.department')->paginate(15);
         return view('bursar.application-fees.index', compact('authUser', 'applicationFees'));
     }
 
