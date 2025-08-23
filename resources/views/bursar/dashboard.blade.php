@@ -89,6 +89,7 @@
                                     <a class="dropdown-item" href="#">Export to Excel</a>
                                     <a class="dropdown-item" href="#">Export to PDF</a>
                                     <a class="dropdown-item" href="{{ route('bursar.payments.application') }}">View All Application Fees</a>
+                                    <a class="dropdown-item" href="{{ route('bursar.payments.school') }}">View All School Fees</a>
                                 </div>
                             </div>
                         </div>
@@ -115,15 +116,27 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>
-                                        @if($transaction->paymentable && $transaction->paymentable->application)
-                                            {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
+                                        @if($transaction->paymentable)
+                                            @if($transaction->paymentable_type === 'App\Models\SchoolFeePayment')
+                                                {{ $transaction->paymentable->student->surname ?? 'N/A' }} {{ $transaction->paymentable->student->othernames ?? '' }}
+                                            @elseif($transaction->paymentable->application)
+                                                {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
+                                            @else
+                                                N/A
+                                            @endif
                                         @else
                                             N/A
                                         @endif
                                     </td>
                                     <td>
-                                        @if($transaction->paymentable && $transaction->paymentable->application)
-                                            {{ $transaction->paymentable->application->email }}
+                                        @if($transaction->paymentable)
+                                            @if($transaction->paymentable_type === 'App\Models\SchoolFeePayment')
+                                                {{ $transaction->paymentable->student->email ?? 'N/A' }}
+                                            @elseif($transaction->paymentable->application)
+                                                {{ $transaction->paymentable->application->email }}
+                                            @else
+                                                N/A
+                                            @endif
                                         @else
                                             N/A
                                         @endif

@@ -63,15 +63,27 @@
                                             </span>
                                         </td>
                                         <td>
-                                            @if($transaction->paymentable && $transaction->paymentable->application)
-                                                {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
+                                            @if($transaction->paymentable)
+                                                @if($transaction->paymentable_type === 'App\Models\SchoolFeePayment')
+                                                    {{ $transaction->paymentable->student->surname ?? 'N/A' }} {{ $transaction->paymentable->student->othernames ?? '' }}
+                                                @elseif($transaction->paymentable->application)
+                                                    {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
+                                                @else
+                                                    <span class="text-muted">N/A</span>
+                                                @endif
                                             @else
                                                 <span class="text-muted">N/A</span>
                                             @endif
                                         </td>
                                         <td>
-                                            @if($transaction->paymentable && $transaction->paymentable->application)
-                                                {{ $transaction->paymentable->application->email }}
+                                            @if($transaction->paymentable)
+                                                @if($transaction->paymentable_type === 'App\Models\SchoolFeePayment')
+                                                    {{ $transaction->paymentable->student->email ?? 'N/A' }}
+                                                @elseif($transaction->paymentable->application)
+                                                    {{ $transaction->paymentable->application->email }}
+                                                @else
+                                                    <span class="text-muted">N/A</span>
+                                                @endif
                                             @else
                                                 <span class="text-muted">N/A</span>
                                             @endif

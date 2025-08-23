@@ -139,6 +139,8 @@ Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('bursar.dashboard');
     Route::get('/payments/application', [BursarController::class, 'payments'])->name('bursar.payments.application');
     Route::get('/payment/{payment}', [BursarController::class, 'showPayment'])->name('bursar.payment.show');
+    Route::get('/payments/school-fees', [BursarController::class, 'schoolFeePayments'])->name('bursar.payments.school');
+    Route::get('/school-fee-payment/{payment}', [BursarController::class, 'showSchoolFeePayment'])->name('bursar.school-fee-payment.show');
     Route::get('/transactions', [BursarController::class, 'transactions'])->name('bursar.transactions');
     Route::get('/transaction/{transaction}', [BursarController::class, 'showTransaction'])->name('bursar.transaction.show');
     Route::patch('/transaction/{transaction}/reconcile', [BursarController::class, 'reconcileTransaction'])->name('bursar.transaction.reconcile');
