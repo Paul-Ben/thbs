@@ -15,4 +15,9 @@ class SchoolSession extends Model
     {
         return $this->hasMany(Semester::class);
     }
+
+    public function schoolFees()
+    {
+        return $this->hasMany(SchoolFee::class);
+    }
 }

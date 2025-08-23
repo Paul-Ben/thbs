@@ -138,7 +138,7 @@ class StudentController extends Controller
         ]);
         
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->with('programme')->first();
         
         if (!$student) {
             return redirect()->route('student.biodata')
@@ -332,7 +332,7 @@ class StudentController extends Controller
     public function feePayments(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::with('user', 'programme')->where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.fee-payments')->with([
@@ -344,18 +344,57 @@ class StudentController extends Controller
             ]);
         }
         
-        $outstandingFees = SchoolFee::where('student_id', $student->id)
-            ->where('status', 'pending')
-            ->with('semester')
+        // Get current session and semester
+        $currentSession = \App\Models\SchoolSession::where('is_current', true)->first();
+        $currentSemester = \App\Models\Semester::where('is_current', true)->first();
+        
+        // Get active school fees for the student's programme, current session, semester, and level
+        $activeFees = SchoolFee::where('programme_id', $student->programme->id ) 
+            ->where('school_session_id', $currentSession?->id)
+            ->where('semester_id', $currentSemester?->id)
+            ->where('level_id', $student->level_id)
+            ->where('is_active', true)
+            ->with(['programme', 'schoolSession', 'semester', 'level'])
             ->get();
+
+    
+        // Filter out fees that have been fully paid
+        $outstandingFees = $activeFees->filter(function($fee) use ($student) {
+            $totalPaid = SchoolFeePayment::where('student_id', $student->id)
+                ->where('school_fee_id', $fee->id)
+                ->where('status', 'successful')
+                ->sum('amount');
+            
+            return $totalPaid < $fee->amount;
+        });
+        
+        // Add remaining amount to each outstanding fee
+        $outstandingFees = $outstandingFees->map(function($fee) use ($student) {
+            $totalPaid = SchoolFeePayment::where('student_id', $student->id)
+                ->where('school_fee_id', $fee->id)
+                ->where('status', 'successful')
+                ->sum('amount');
+            
+            $fee->remaining_amount = $fee->amount - $totalPaid;
+            return $fee;
+        });
             
         $recentPayments = SchoolFeePayment::where('student_id', $student->id)
             ->with('schoolFee')
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
+        
+        // Calculate payment summary
+        $totalOutstanding = $outstandingFees->sum('remaining_amount');
+        $totalPaid = SchoolFeePayment::where('student_id', $student->id)
+            ->where('status', 'successful')
+            ->sum('amount');
+        
+        $totalFees = $activeFees->sum('amount');
+        $paymentProgress = $totalFees > 0 ? round(($totalPaid / $totalFees) * 100, 1) : 0;
             
-        return view('student.fee-payments', compact('authUser', 'student', 'outstandingFees', 'recentPayments'));
+        return view('student.fee-payments', compact('authUser', 'student', 'outstandingFees', 'recentPayments', 'totalOutstanding', 'totalPaid', 'paymentProgress'));
     }
     
     /**

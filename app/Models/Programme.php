@@ -34,4 +34,9 @@ class Programme extends Model
     {
         return $this->hasMany(ApplicationFee::class);
     }
+
+    public function programme()
+    {
+        return $this->hasMany(SchoolFee::class);
+    }
 }

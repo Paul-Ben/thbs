@@ -49,21 +49,31 @@
                             <div class="card-body">
                                 <div class="row align-items-center">
                                     <div class="col-md-6">
-                                        <h6 class="mb-1">{{ $fee->session->session_name ?? 'Current Session' }}</h6>
+                                        <h6 class="mb-1">{{ $fee->name }}</h6>
                                         <p class="text-muted mb-1">
-                                            {{ $student->programme->name ?? 'Unknown Programme' }} - {{ $fee->level->level_name ?? 'Unknown Level' }}
+                                            {{ $fee->schoolSession->session_name ?? 'Current Session' }} - {{ $fee->semester->semester_name ?? 'Current Semester' }}
                                         </p>
-                                        <small class="text-muted">Due Date: {{ $fee->due_date ?? 'Not Set' }}</small>
+                                        <p class="text-muted mb-1">
+                                            {{ $fee->programme->name ?? 'Unknown Programme' }} - {{ $fee->level->name ?? 'Unknown Level' }}
+                                        </p>
+                                        <small class="text-muted">Due Date: {{ $fee->due_date ? $fee->due_date->format('M d, Y') : 'Not Set' }}</small>
+                                        <br>
+                                        <small class="text-info">Fee Type: {{ ucfirst($fee->fee_type) }}</small>
                                     </div>
                                     <div class="col-md-3 text-center">
-                                        <h5 class="mb-0 text-primary">₦{{ number_format($fee->amount, 2) }}</h5>
+                                        <h5 class="mb-0 text-primary">₦{{ number_format($fee->remaining_amount, 2) }}</h5>
                                         <small class="text-muted">Amount Due</small>
+                                        @if($fee->remaining_amount < $fee->amount)
+                                            <br>
+                                            <small class="text-success">Paid: ₦{{ number_format($fee->amount - $fee->remaining_amount, 2) }}</small>
+                                        @endif
                                     </div>
                                     <div class="col-md-3 text-end">
                                         <button type="button" class="btn btn-primary btn-sm pay-fee-btn" 
                                                 data-fee-id="{{ $fee->id }}" 
-                                                data-amount="{{ $fee->amount }}" 
-                                                data-session="{{ $fee->session->session_name ?? 'Current Session' }}">
+                                                data-amount="{{ $fee->remaining_amount }}" 
+                                                data-fee-name="{{ $fee->name }}"
+                                                data-session="{{ $fee->schoolSession->session_name ?? 'Current Session' }}">
                                             <i class="fas fa-credit-card me-1"></i> Pay Now
                                         </button>
                                     </div>
@@ -272,13 +282,14 @@
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <h6 class="text-muted mb-2">Payment Details</h6>
+                                <p class="mb-1"><strong>Fee:</strong> <span id="payment_fee_name"></span></p>
                                 <p class="mb-1"><strong>Session:</strong> <span id="payment_session"></span></p>
                                 <p class="mb-1"><strong>Student:</strong> {{ Auth::user()->name }}</p>
-                                <p class="mb-0"><strong>Matric Number:</strong> {{ Auth::user()->student->matric_number ?? 'Not Assigned' }}</p>
+                                <p class="mb-0"><strong>Matric Number:</strong> {{ $student->matric_number ?? 'Not Assigned' }}</p>
                             </div>
                             <div class="col-md-6">
                                 <h6 class="text-muted mb-2">Amount</h6>
-                                <h3 class="text-primary mb-0">₦<span id="payment_amount"></span></h3>
+                                <h3 class="text-primary mb-0"><span id="payment_amount"></span></h3>
                             </div>
                         </div>
                         
@@ -393,10 +404,12 @@ $(document).ready(function() {
         const feeId = $(this).data('fee-id');
         const amount = $(this).data('amount');
         const session = $(this).data('session');
+        const feeName = $(this).data('fee-name');
         
         $('#fee_id').val(feeId);
-        $('#payment_amount').text(new Intl.NumberFormat().format(amount));
+        $('#payment_amount').text('₦' + new Intl.NumberFormat().format(amount));
         $('#payment_session').text(session);
+        $('#payment_fee_name').text(feeName);
         
         $('#paymentModal').modal('show');
     });
