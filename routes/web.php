@@ -32,9 +32,17 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/', [ApplicationController::class, 'landing'])->name('application.landing');
 
+// Payment routes that don't require authentication
 Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::get('/payment/success', function() { return view('payment.success'); })->name('payment.success');
+
+// Protected payment routes
+Route::middleware('auth')->group(function () {
+    Route::post('/payment/school-fee/initialize', [PaymentController::class, 'initializeSchoolFee'])->name('payment.school-fee.initialize');
+    
+
+});
 
 Route::get('/application/apply/{tx_ref}', [ApplicationController::class, 'create'])->name('application.create');
 Route::post('/application/{tx_ref}', [ApplicationController::class, 'store'])->name('application.store');
