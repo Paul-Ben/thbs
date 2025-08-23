@@ -155,6 +155,15 @@ class SchoolFeePayment implements PaymentTypeInterface
             ]
         );
 
+        // Create transaction record
+        $payment->transactions()->create([
+            'type' => 'School fee payment',
+            'status' => $data['status'] ?? PaymentStatus::SUCCESSFUL,
+            'amount' => $data['amount'] ?? 0,
+            'currency_code' => $data['currency'] ?? 'NGN',
+            'is_reconciled' => false,
+        ]);
+
         return [
             'status' => PaymentStatus::SUCCESSFUL,
             'payment_model' => $payment
