@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ApplicationFeePayment;
 use App\Models\AptitudeTestPayment;
+use App\Models\SchoolFeePayment;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,13 +13,21 @@ class DashboardController extends Controller
 {
     public function index()
     {
-       $recentTransactions = Transaction::with([
-           'paymentable',
-           'paymentable.application.programme'
-       ])
+       $recentTransactions = Transaction::with('paymentable')
        ->orderBy('created_at', 'desc')
        ->limit(5)
-       ->get();
+       ->get()
+       ->map(function($transaction) {
+           // Load specific relationships based on payment type
+           if ($transaction->paymentable_type === 'App\\Models\\ApplicationFeePayment') {
+               $transaction->load('paymentable.application.programme');
+           } elseif ($transaction->paymentable_type === 'App\\Models\\SchoolFeePayment') {
+               $transaction->load('paymentable.student', 'paymentable.schoolFee');
+           } elseif ($transaction->paymentable_type === 'App\\Models\\AptitudeTestPayment') {
+               $transaction->load('paymentable.application.programme');
+           }
+           return $transaction;
+       });
    
 
         // $totalRevenue = ApplicationFeePayment::where('status', 'successful')->sum('amount');
@@ -32,9 +41,12 @@ class DashboardController extends Controller
         $aptitudeTestRevenue = AptitudeTestPayment::where('status', 'successful')
             ->sum('amount');
 
-        $totalRevenue = $applicationRevenue + $aptitudeTestRevenue;
+        $schoolFeeRevenue = SchoolFeePayment::where('status', 'successful')
+            ->sum('amount');
+
+        $totalRevenue = $applicationRevenue + $aptitudeTestRevenue + $schoolFeeRevenue;
         
-        $schoolChargeRevenue = 0;
+        $schoolChargeRevenue = $schoolFeeRevenue;
         
         $totalTransactions = Transaction::count();
         if (Auth::check()) {
