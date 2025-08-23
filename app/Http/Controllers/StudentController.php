@@ -9,6 +9,8 @@ use App\Models\CourseRegistration;
 use App\Models\SchoolFeePayment;
 use App\Models\Result;
 use App\Models\SchoolFee;
+use App\Models\SchoolSession;
+use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -25,7 +27,6 @@ class StudentController extends Controller
     public function dashboard(): View
     {
         $authUser = Auth::user();
-        // $student = $authUser->student;
         $student = Student::with('user')->where('user_id', $authUser->id)->first();
        
         // Check if student record exists
@@ -49,13 +50,13 @@ class StudentController extends Controller
             })
             ->count();
             
-        $currentCGPA = $student->results()->avg('score') ?? 0;
+        // Use the new GPA calculation method
+        $currentCGPA = $student->calculateGPA() ?? 0;
         
-        // $outstandingFees = SchoolFee::where('student_id', $student->id)
-        //     ->where('status', 'pending')
-        //     ->sum('amount');
-            
-        $currentLevel = $student->current_level ?? '100 Level';
+        $currentLevel = $student->current_level ?? ($student->level->name ?? '100 Level');
+        
+        // Get outstanding fees
+        $outstandingFees = $this->getOutstandingFees($student);
         
         // Recent activities
         $recentActivities = collect()
@@ -69,7 +70,7 @@ class StudentController extends Controller
                             'type' => 'Course Registration',
                             'description' => "Registered for {$reg->course->title}",
                             'date' => $reg->created_at,
-                            'status' => 'completed'
+                            'status' => $reg->status
                         ];
                     })
             )
@@ -95,7 +96,7 @@ class StudentController extends Controller
             'student',
             'registeredCourses',
             'currentCGPA',
-            // 'outstandingFees',
+            'outstandingFees',
             'currentLevel',
             'recentActivities'
         ));
@@ -145,26 +146,34 @@ class StudentController extends Controller
                 ->with('error', 'Student profile not found. Please contact the administration to complete your student registration.');
         }
         
-        // Update user information
-        $user = User::find($authUser->id);
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email
-        ]);
-        
-        // Update student information with available fields
-        $student->update([
-            'phone' => $request->phone,
-            'date_of_birth' => $request->date_of_birth,
-            'address' => $request->address,
-            'gender' => $request->gender,
-            'country' => $request->country,
-            'state_of_origin' => $request->state_of_origin,
-            'lga' => $request->lga
-        ]);
-        
-        return redirect()->route('student.biodata')
-            ->with('success', 'Biodata updated successfully!');
+        try {
+            DB::transaction(function() use ($request, $authUser, $student) {
+                // Update user information
+                $user = User::find($authUser->id);
+                $user->update([
+                    'name' => $request->name,
+                    'email' => $request->email
+                ]);
+                
+                // Update student information with available fields
+                $student->update([
+                    'phone' => $request->phone,
+                    'date_of_birth' => $request->date_of_birth,
+                    'address' => $request->address,
+                    'gender' => $request->gender,
+                    'country' => $request->country,
+                    'state_of_origin' => $request->state_of_origin,
+                    'lga' => $request->lga
+                ]);
+            });
+            
+            return redirect()->route('student.biodata')
+                ->with('success', 'Biodata updated successfully!');
+                
+        } catch (\Exception $e) {
+            return redirect()->route('student.biodata')
+                ->with('error', 'An error occurred while updating your biodata. Please try again.');
+        }
     }
     
     /**
@@ -176,7 +185,8 @@ class StudentController extends Controller
             'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
         
-        $student = Auth::user()->student;
+        $authUser = Auth::user();
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return response()->json([
@@ -185,29 +195,37 @@ class StudentController extends Controller
             ], 404);
         }
         
-        if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            if ($student->photo && Storage::exists('public/student-photos/' . $student->photo)) {
-                Storage::delete('public/student-photos/' . $student->photo);
+        try {
+            if ($request->hasFile('photo')) {
+                // Delete old photo if exists
+                if ($student->photo && Storage::exists('public/student-photos/' . $student->photo)) {
+                    Storage::delete('public/student-photos/' . $student->photo);
+                }
+                
+                // Store new photo
+                $photoName = time() . '_' . ($student->matric_number ?? $student->id) . '.' . $request->photo->extension();
+                $request->photo->storeAs('public/student-photos', $photoName);
+                
+                $student->update(['passport' => $photoName]);
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Photo updated successfully!',
+                    'photo_url' => Storage::url('student-photos/' . $photoName)
+                ]);
             }
             
-            // Store new photo
-            $photoName = time() . '_' . $student->matric_number . '.' . $request->photo->extension();
-            $request->photo->storeAs('public/student-photos', $photoName);
-            
-            $student->update(['passport' => $photoName]);
-            
             return response()->json([
-                'success' => true,
-                'message' => 'Photo updated successfully!',
-                'photo_url' => Storage::url('student-photos/' . $photoName)
+                'success' => false,
+                'message' => 'No photo uploaded'
             ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while uploading your photo. Please try again.'
+            ], 500);
         }
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'No photo uploaded'
-        ]);
     }
     
     /**
@@ -216,7 +234,7 @@ class StudentController extends Controller
     public function courseRegistration(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->with(['programme', 'level'])->first();
         
         if (!$student) {
             return view('student.course-registration')->with([
@@ -225,37 +243,86 @@ class StudentController extends Controller
                 'student' => null,
                 'availableCourses' => collect(),
                 'registeredCourses' => collect(),
-                'registeredCourseIds' => []
+                'registeredCourseIds' => [],
+                'currentSemester' => null,
+                'canRegister' => false
+            ]);
+        }
+        
+        // Get current semester
+        $currentSemester = Semester::where('is_current', true)->first();
+        
+        if (!$currentSemester) {
+            return view('student.course-registration')->with([
+                'error' => 'No active semester found. Please contact the administration.',
+                'authUser' => $authUser,
+                'student' => $student,
+                'availableCourses' => collect(),
+                'registeredCourses' => collect(),
+                'registeredCourseIds' => [],
+                'currentSemester' => null,
+                'canRegister' => false
+            ]);
+        }
+        
+        // Check registration deadline
+        $canRegister = true;
+        $deadlineMessage = null;
+        
+        if ($currentSemester->registration_end_date && now() > $currentSemester->registration_end_date) {
+            $canRegister = false;
+            $deadlineMessage = 'Course registration has closed for this semester.';
+        }
+        
+        // Check fee payment status before allowing registration
+        $hasPaidFees = $this->checkFeePayment($student);
+        if (!$hasPaidFees && $canRegister) {
+            $canRegister = false;
+            return view('student.course-registration')->with([
+                'error' => 'You must pay your school fees to register for courses.',
+                'authUser' => $authUser,
+                'student' => $student,
+                'availableCourses' => collect(),
+                'registeredCourses' => collect(),
+                'registeredCourseIds' => [],
+                'currentSemester' => $currentSemester,
+                'feePaymentRequired' => true,
+                'canRegister' => false
             ]);
         }
         
         // Get available courses for current level and semester
         $availableCourses = Course::where('programme_id', $student->programme_id)
-            ->whereHas('level', function($query) use ($student) {
-                $query->where('id', $student->level_id ?? 'Level not set');
+            ->when($student->level_id, function($query) use ($student) {
+                $query->where('level_id', $student->level_id);
             })
-            ->whereHas('semester', function($query) {
-                $query->where('is_current', true);
-            })
+            ->where('semester_id', $currentSemester->id)
             ->with(['level', 'semester'])
+            ->orderBy('code')
             ->get();
             
-        // Get already registered courses
+        // Get already registered courses for current semester
         $registeredCourses = CourseRegistration::where('student_id', $student->id)
-            ->whereHas('semester', function($query) {
-                $query->where('is_current', true);
-            })
-            ->with('course')
+            ->where('semester_id', $currentSemester->id)
+            ->with(['course'])
             ->get();
             
         $registeredCourseIds = $registeredCourses->pluck('course_id')->toArray();
+        
+        // Calculate current total units
+        $totalUnits = $registeredCourses->sum(function($reg) {
+            return $reg->course->credit_units ?? 0;
+        });
         
         return view('student.course-registration', compact(
             'authUser',
             'student',
             'availableCourses',
             'registeredCourses',
-            'registeredCourseIds'
+            'registeredCourseIds',
+            'currentSemester',
+            'canRegister',
+            'totalUnits'
         ));
     }
     
@@ -269,36 +336,171 @@ class StudentController extends Controller
             'courses.*' => 'exists:courses,id'
         ]);
         
-        $student = Auth::user()->student;
+        $authUser = Auth::user();
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
-            return redirect()->route('student.course-registration')
-                ->with('error', 'Student profile not found. Please contact the administration to complete your student registration.');
+            return redirect()->route('student.course-registration.current')
+                ->with('error', 'Student profile not found.');
         }
         
-        DB::transaction(function() use ($request, $student) {
-            // Delete existing registrations for current semester
-            CourseRegistration::where('student_id', $student->id)
-                ->whereHas('semester', function($query) {
-                    $query->where('is_current', true);
-                })
-                ->delete();
-                
-            // Register new courses
-            foreach ($request->courses as $courseId) {
-                $course = Course::find($courseId);
-                CourseRegistration::create([
-                    'student_id' => $student->id,
-                    'course_id' => $courseId,
-                    'semester_id' => $course->semester_id,
-                    'level_id' => $course->level_id,
-                    'status' => 'registered'
-                ]);
-            }
-        });
+        // Get current semester
+        $currentSemester = Semester::where('is_current', true)->first();
         
-        return redirect()->route('student.course-registration')
-            ->with('success', 'Course registration completed successfully!');
+        if (!$currentSemester) {
+            return redirect()->route('student.course-registration.current')
+                ->with('error', 'No active semester found.');
+        }
+        
+        // Check for registration deadline
+        if ($currentSemester->registration_end_date && now() > $currentSemester->registration_end_date) {
+            return redirect()->route('student.course-registration.current')
+                ->with('error', 'Course registration has closed for this semester.');
+        }
+        
+        // Check fee payment status
+        $hasPaidFees = $this->checkFeePayment($student);
+        if (!$hasPaidFees) {
+            return redirect()->route('student.course-registration.current')
+                ->with('error', 'You must pay your school fees to register for courses.');
+        }
+        
+        // Validate selected courses belong to student's programme and level
+        $validCourses = Course::whereIn('id', $request->courses)
+            ->where('programme_id', $student->programme_id)
+            ->when($student->level_id, function($query) use ($student) {
+                $query->where('level_id', $student->level_id);
+            })
+            ->where('semester_id', $currentSemester->id)
+            ->get();
+            
+        if ($validCourses->count() !== count($request->courses)) {
+            return redirect()->route('student.course-registration.current')
+                ->with('error', 'Some selected courses are not valid for your programme or level.');
+        }
+        
+        // Calculate total units
+        $totalUnits = $validCourses->sum('credit_units');
+        
+        // Optional: Validate unit limits (with warnings, not hard stops)
+        $warningMessage = null;
+        if ($totalUnits > 24) {
+            $warningMessage = 'You have selected ' . $totalUnits . ' units which exceeds the recommended maximum of 24 units.';
+        } elseif ($totalUnits < 15) {
+            $warningMessage = 'You have selected ' . $totalUnits . ' units which is below the recommended minimum of 15 units.';
+        }
+        
+        try {
+            DB::transaction(function() use ($request, $student, $currentSemester) {
+                // Remove existing registrations for this semester
+                CourseRegistration::where('student_id', $student->id)
+                    ->where('semester_id', $currentSemester->id)
+                    ->delete();
+                
+                // Create new registrations
+                $registrations = [];
+                foreach ($request->courses as $courseId) {
+                    $registrations[] = [
+                        'student_id' => $student->id,
+                        'course_id' => $courseId,
+                        'school_session_id' => $currentSemester->school_session_id,
+                        'semester_id' => $currentSemester->id,
+                        'level_id' => $student->level_id,
+                        'status' => 'approved', // Auto-approve or set to 'pending' based on your requirements
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                
+                CourseRegistration::insert($registrations);
+            });
+            
+            $successMessage = 'Course registration completed successfully! You have registered for ' . count($request->courses) . ' courses (' . $totalUnits . ' units).';
+            
+            if ($warningMessage) {
+                return redirect()->route('student.course-registration.current')
+                    ->with('success', $successMessage)
+                    ->with('warning', $warningMessage);
+            }
+            
+            return redirect()->route('student.course-registration.current')
+                ->with('success', $successMessage);
+                
+        } catch (\Exception $e) {
+            return redirect()->route('student.course-registration.current')
+                ->with('error', 'An error occurred while processing your registration. Please try again.');
+        }
+    }
+    
+    /**
+     * Check if student has paid fees for current semester
+     */
+    private function checkFeePayment(Student $student): bool
+    {
+        $currentSession = SchoolSession::where('is_current', true)->first();
+        $currentSemester = Semester::where('is_current', true)->first();
+
+        if (!$currentSession || !$currentSemester) {
+            return true; // No current session/semester defined, allow registration
+        }
+
+        // Check if a fee record exists for this student, session, and semester
+        $requiredFee = SchoolFee::where('programme_id', $student->programme_id)
+            ->where('school_session_id', $currentSession->id)
+            ->where('semester_id', $currentSemester->id)
+            ->when($student->level_id, function($query) use ($student) {
+                $query->where('level_id', $student->level_id);
+            })
+            ->where('is_active', true)
+            ->first();
+
+        if (!$requiredFee) {
+            return true; // No fee defined, so student can proceed
+        }
+
+        $totalPaid = SchoolFeePayment::where('student_id', $student->id)
+            ->where('school_fee_id', $requiredFee->id)
+            ->where('status', 'successful')
+            ->sum('amount');
+
+        return $totalPaid >= $requiredFee->amount;
+    }
+    
+    /**
+     * Get outstanding fees for student
+     */
+    private function getOutstandingFees(Student $student): float
+    {
+        $currentSession = SchoolSession::where('is_current', true)->first();
+        $currentSemester = Semester::where('is_current', true)->first();
+        
+        if (!$currentSession || !$currentSemester) {
+            return 0;
+        }
+        
+        $activeFees = SchoolFee::where('programme_id', $student->programme_id)
+            ->where('school_session_id', $currentSession->id)
+            ->where('semester_id', $currentSemester->id)
+            ->when($student->level_id, function($query) use ($student) {
+                $query->where('level_id', $student->level_id);
+            })
+            ->where('is_active', true)
+            ->get();
+            
+        $totalOutstanding = 0;
+        foreach ($activeFees as $fee) {
+            $totalPaid = SchoolFeePayment::where('student_id', $student->id)
+                ->where('school_fee_id', $fee->id)
+                ->where('status', 'successful')
+                ->sum('amount');
+                
+            $outstanding = $fee->amount - $totalPaid;
+            if ($outstanding > 0) {
+                $totalOutstanding += $outstanding;
+            }
+        }
+        
+        return $totalOutstanding;
     }
     
     /**
@@ -307,23 +509,89 @@ class StudentController extends Controller
     public function courseRegistrationHistory(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.course-registration-history')->with([
                 'error' => 'Student profile not found. Please contact the administration to complete your student registration.',
                 'authUser' => $authUser,
                 'student' => null,
-                'registrations' => collect()->paginate(15)
+                'registrationHistory' => [],
+                'totalSessions' => 0,
+                'totalCourses' => 0,
+                'totalUnits' => 0,
+                'averageUnitsPerSemester' => 0
             ]);
         }
         
+        // Get registration history grouped by session and semester
         $registrations = CourseRegistration::where('student_id', $student->id)
-            ->with(['course', 'semester', 'level'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->with(['course', 'semester.schoolSession', 'level'])
+            ->join('semesters', 'course_registrations.semester_id', '=', 'semesters.id')
+            ->join('school_sessions', 'semesters.school_session_id', '=', 'school_sessions.id')
+            ->orderBy('school_sessions.session_name', 'desc')
+            ->orderBy('semesters.semester_name', 'asc')
+            ->select('course_registrations.*')
+            ->get();
             
-        return view('student.course-registration-history', compact('authUser', 'student', 'registrations'));
+        // Group by session and semester
+        $registrationHistory = [];
+        $totalCourses = 0;
+        $totalUnits = 0;
+        $semesterCount = 0;
+        
+        foreach ($registrations->groupBy(function($item) {
+            return $item->semester->schoolSession->session_name ?? 'Unknown Session';
+        }) as $sessionName => $sessionRegistrations) {
+            
+            $registrationHistory[$sessionName] = [];
+            
+            foreach ($sessionRegistrations->groupBy('semester.semester_name') as $semesterName => $semesterRegistrations) {
+                $courses = [];
+                $semesterUnits = 0;
+                $semesterCount++;
+                
+                foreach ($semesterRegistrations as $registration) {
+                    $courseUnits = $registration->course->credit_units ?? 0;
+                    
+                    $courses[] = [
+                        'code' => $registration->course->code,
+                        'title' => $registration->course->title,
+                        'units' => $courseUnits,
+                        'type' => $registration->course->course_type ?? 'Elective',
+                        'status' => $registration->status ?? 'approved'
+                    ];
+                    
+                    $semesterUnits += $courseUnits;
+                    $totalCourses++;
+                }
+                
+                $totalUnits += $semesterUnits;
+                
+                $registrationHistory[$sessionName][$semesterName] = [
+                    'courses' => $courses,
+                    'total_units' => $semesterUnits,
+                    'course_count' => count($courses),
+                    'registration_date' => $semesterRegistrations->first()->created_at->format('M j, Y'),
+                    'status' => $semesterRegistrations->first()->status ?? 'approved',
+                    'level' => $semesterRegistrations->first()->level->name ?? 'N/A',
+                    'semester_id' => $semesterRegistrations->first()->semester_id
+                ];
+            }
+        }
+        
+        $totalSessions = count($registrationHistory);
+        $averageUnitsPerSemester = $semesterCount > 0 ? round($totalUnits / $semesterCount, 1) : 0;
+            
+        return view('student.course-registration-history', compact(
+            'authUser', 
+            'student', 
+            'registrationHistory',
+            'totalSessions',
+            'totalCourses', 
+            'totalUnits',
+            'averageUnitsPerSemester'
+        ));
     }
     
     /**
@@ -340,24 +608,28 @@ class StudentController extends Controller
                 'authUser' => $authUser,
                 'student' => null,
                 'outstandingFees' => collect(),
-                'recentPayments' => collect()
+                'recentPayments' => collect(),
+                'totalOutstanding' => 0,
+                'totalPaid' => 0,
+                'paymentProgress' => 0
             ]);
         }
         
         // Get current session and semester
-        $currentSession = \App\Models\SchoolSession::where('is_current', true)->first();
-        $currentSemester = \App\Models\Semester::where('is_current', true)->first();
+        $currentSession = SchoolSession::where('is_current', true)->first();
+        $currentSemester = Semester::where('is_current', true)->first();
         
         // Get active school fees for the student's programme, current session, semester, and level
-        $activeFees = SchoolFee::where('programme_id', $student->programme->id ) 
+        $activeFees = SchoolFee::where('programme_id', $student->programme_id) 
             ->where('school_session_id', $currentSession?->id)
             ->where('semester_id', $currentSemester?->id)
-            ->where('level_id', $student->level_id)
+            ->when($student->level_id, function($query) use ($student) {
+                $query->where('level_id', $student->level_id);
+            })
             ->where('is_active', true)
             ->with(['programme', 'schoolSession', 'semester', 'level'])
             ->get();
 
-    
         // Filter out fees that have been fully paid
         $outstandingFees = $activeFees->filter(function($fee) use ($student) {
             $totalPaid = SchoolFeePayment::where('student_id', $student->id)
@@ -376,6 +648,7 @@ class StudentController extends Controller
                 ->sum('amount');
             
             $fee->remaining_amount = $fee->amount - $totalPaid;
+            $fee->paid_amount = $totalPaid;
             return $fee;
         });
             
@@ -408,7 +681,8 @@ class StudentController extends Controller
             'payment_method' => 'required|in:card,bank_transfer,mobile_money'
         ]);
         
-        $student = Auth::user()->student;
+        $authUser = Auth::user();
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return response()->json([
@@ -419,38 +693,48 @@ class StudentController extends Controller
         
         $schoolFee = SchoolFee::findOrFail($request->school_fee_id);
         
-        // Verify the fee belongs to the student
-        if ($schoolFee->student_id !== $student->id) {
+        // Validate payment amount doesn't exceed outstanding amount
+        $totalPaid = SchoolFeePayment::where('student_id', $student->id)
+            ->where('school_fee_id', $schoolFee->id)
+            ->where('status', 'successful')
+            ->sum('amount');
+            
+        $outstandingAmount = $schoolFee->amount - $totalPaid;
+        
+        if ($request->amount > $outstandingAmount) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized access to fee record'
-            ], 403);
+                'message' => 'Payment amount exceeds outstanding balance of ₦' . number_format($outstandingAmount, 2)
+            ], 400);
         }
         
-        // Create payment record
-        $payment = SchoolFeePayment::create([
-            'student_id' => $student->id,
-            'school_fee_id' => $schoolFee->id,
-            'amount' => $request->amount,
-            'payment_method' => $request->payment_method,
-            'reference' => 'PAY_' . time() . '_' . $student->id,
-            'status' => 'pending'
-        ]);
-        
-        // Here you would integrate with actual payment gateway
-        // For now, we'll simulate a successful payment
-        $payment->update(['status' => 'successful']);
-        
-        // Update school fee if fully paid
-        if ($payment->amount >= $schoolFee->amount) {
-            $schoolFee->update(['status' => 'paid']);
+        try {
+            // Create payment record
+            $payment = SchoolFeePayment::create([
+                'student_id' => $student->id,
+                'school_fee_id' => $schoolFee->id,
+                'amount' => $request->amount,
+                'payment_method' => $request->payment_method,
+                'reference' => 'PAY_' . time() . '_' . $student->id,
+                'status' => 'pending'
+            ]);
+            
+            // Here you would integrate with actual payment gateway
+            // For now, we'll simulate a successful payment
+            $payment->update(['status' => 'successful']);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment processed successfully!',
+                'payment_id' => $payment->id
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while processing your payment. Please try again.'
+            ], 500);
         }
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment processed successfully!',
-            'payment_id' => $payment->id
-        ]);
     }
     
     /**
@@ -459,7 +743,7 @@ class StudentController extends Controller
     public function paymentHistory(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.payment-history')->with([
@@ -471,7 +755,7 @@ class StudentController extends Controller
         }
         
         $payments = SchoolFeePayment::where('student_id', $student->id)
-            ->with('schoolFee')
+            ->with(['schoolFee.programme', 'schoolFee.semester', 'schoolFee.schoolSession'])
             ->orderBy('created_at', 'desc')
             ->paginate(15);
             
@@ -484,7 +768,7 @@ class StudentController extends Controller
     public function paymentReceipt($paymentId): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.payment-receipt')->with([
@@ -497,7 +781,7 @@ class StudentController extends Controller
         
         $payment = SchoolFeePayment::where('id', $paymentId)
             ->where('student_id', $student->id)
-            ->with('schoolFee')
+            ->with(['schoolFee.programme', 'schoolFee.semester', 'schoolFee.schoolSession'])
             ->firstOrFail();
             
         return view('student.payment-receipt', compact('authUser', 'student', 'payment'));
@@ -509,7 +793,7 @@ class StudentController extends Controller
     public function results(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.results')->with([
@@ -522,13 +806,19 @@ class StudentController extends Controller
         }
         
         $results = Result::where('student_id', $student->id)
-            ->with(['course', 'semester'])
-            ->orderBy('semester_id', 'desc')
+            ->with(['course', 'semester.schoolSession'])
+            ->join('semesters', 'results.semester_id', '=', 'semesters.id')
+            ->join('school_sessions', 'semesters.school_session_id', '=', 'school_sessions.id')
+            ->orderBy('school_sessions.session_name', 'desc')
+            ->orderBy('semesters.semester_name', 'asc')
+            ->select('results.*')
             ->get()
-            ->groupBy('semester.semester_name');
+            ->groupBy(function($result) {
+                return $result->semester->schoolSession->session_name . ' - ' . $result->semester->semester_name;
+            });
             
-        $overallGPA = Result::where('student_id', $student->id)
-            ->avg('grade_point') ?? 0;
+        // Use the new GPA calculation method
+        $overallGPA = $student->calculateGPA() ?? 0;
             
         return view('student.results', compact('authUser', 'student', 'results', 'overallGPA'));
     }
@@ -539,7 +829,7 @@ class StudentController extends Controller
     public function resultsBySemester($semesterId): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.semester-results')->with([
@@ -547,18 +837,40 @@ class StudentController extends Controller
                 'authUser' => $authUser,
                 'student' => null,
                 'results' => collect(),
-                'semesterGPA' => 0
+                'semesterGPA' => 0,
+                'semester' => null
             ]);
         }
         
+        $semester = Semester::with('schoolSession')->findOrFail($semesterId);
+        
         $results = Result::where('student_id', $student->id)
             ->where('semester_id', $semesterId)
-            ->with(['course', 'semester'])
+            ->with(['course', 'semester.schoolSession'])
+            ->orderBy('course_id')
             ->get();
             
-        $semesterGPA = $results->avg('grade_point') ?? 0;
+        // Use the new GPA calculation method for specific semester
+        $semesterGPA = $student->calculateGPA($semesterId) ?? 0;
         
-        return view('student.semester-results', compact('authUser', 'student', 'results', 'semesterGPA'));
+        // Calculate semester statistics
+        $totalUnits = $results->sum(function($result) {
+            return $result->course->credit_units ?? 0;
+        });
+        
+        $totalGradePoints = $results->sum(function($result) {
+            return ($result->course->credit_units ?? 0) * ($result->grade_point ?? 0);
+        });
+        
+        return view('student.semester-results', compact(
+            'authUser', 
+            'student', 
+            'results', 
+            'semesterGPA', 
+            'semester',
+            'totalUnits',
+            'totalGradePoints'
+        ));
     }
     
     /**
@@ -567,7 +879,7 @@ class StudentController extends Controller
     public function support(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.support')->with([
@@ -577,6 +889,180 @@ class StudentController extends Controller
             ]);
         }
         
-        return view('student.support', compact('authUser', 'student'));
+        // Get common support topics/FAQs
+        $supportTopics = [
+            [
+                'title' => 'Course Registration Issues',
+                'description' => 'Problems with course selection, registration deadlines, or course availability',
+                'icon' => 'fas fa-book',
+                'category' => 'academic'
+            ],
+            [
+                'title' => 'Fee Payment Problems',
+                'description' => 'Issues with payment processing, receipt generation, or fee calculations',
+                'icon' => 'fas fa-credit-card',
+                'category' => 'financial'
+            ],
+            [
+                'title' => 'Academic Records',
+                'description' => 'Questions about grades, transcripts, or academic standing',
+                'icon' => 'fas fa-chart-line',
+                'category' => 'academic'
+            ],
+            [
+                'title' => 'Profile Updates',
+                'description' => 'Help with updating personal information, photos, or contact details',
+                'icon' => 'fas fa-user-edit',
+                'category' => 'profile'
+            ],
+            [
+                'title' => 'Technical Support',
+                'description' => 'Login issues, system errors, or general technical problems',
+                'icon' => 'fas fa-cog',
+                'category' => 'technical'
+            ]
+        ];
+        
+        return view('student.support', compact('authUser', 'student', 'supportTopics'));
+    }
+    
+    /**
+     * Get student's current semester registration status
+     */
+    public function getRegistrationStatus(): array
+    {
+        $authUser = Auth::user();
+        $student = Student::where('user_id', $authUser->id)->first();
+        
+        if (!$student) {
+            return [
+                'can_register' => false,
+                'message' => 'Student profile not found.',
+                'registered_courses' => 0,
+                'total_units' => 0
+            ];
+        }
+        
+        $currentSemester = Semester::where('is_current', true)->first();
+        
+        if (!$currentSemester) {
+            return [
+                'can_register' => false,
+                'message' => 'No active semester found.',
+                'registered_courses' => 0,
+                'total_units' => 0
+            ];
+        }
+        
+        // Check registration deadline
+        $canRegister = true;
+        $message = 'Registration is open.';
+        
+        if ($currentSemester->registration_end_date && now() > $currentSemester->registration_end_date) {
+            $canRegister = false;
+            $message = 'Course registration has closed for this semester.';
+        }
+        
+        // Check fee payment
+        if ($canRegister && !$this->checkFeePayment($student)) {
+            $canRegister = false;
+            $message = 'You must pay your school fees to register for courses.';
+        }
+        
+        // Get current registration
+        $registeredCourses = CourseRegistration::where('student_id', $student->id)
+            ->where('semester_id', $currentSemester->id)
+            ->with('course')
+            ->get();
+            
+        $totalUnits = $registeredCourses->sum(function($reg) {
+            return $reg->course->credit_units ?? 0;
+        });
+        
+        return [
+            'can_register' => $canRegister,
+            'message' => $message,
+            'registered_courses' => $registeredCourses->count(),
+            'total_units' => $totalUnits,
+            'semester' => $currentSemester->semester_name . ' ' . ($currentSemester->schoolSession->session_name ?? ''),
+            'deadline' => $currentSemester->registration_end_date ? 
+                $currentSemester->registration_end_date->format('F j, Y') : null
+        ];
+    }
+    
+    /**
+     * Get available courses for student
+     */
+    public function getAvailableCourses(): array
+    {
+        $authUser = Auth::user();
+        $student = Student::where('user_id', $authUser->id)->first();
+        
+        if (!$student) {
+            return ['error' => 'Student profile not found.'];
+        }
+        
+        $currentSemester = Semester::where('is_current', true)->first();
+        
+        if (!$currentSemester) {
+            return ['error' => 'No active semester found.'];
+        }
+        
+        $availableCourses = Course::where('programme_id', $student->programme_id)
+            ->when($student->level_id, function($query) use ($student) {
+                $query->where('level_id', $student->level_id);
+            })
+            ->where('semester_id', $currentSemester->id)
+            ->with(['level', 'semester'])
+            ->orderBy('code')
+            ->get()
+            ->map(function($course) {
+                return [
+                    'id' => $course->id,
+                    'code' => $course->code,
+                    'title' => $course->title,
+                    'units' => $course->credit_units,
+                    'type' => $course->course_type ?? 'Elective'
+                ];
+            });
+            
+        return ['courses' => $availableCourses];
+    }
+    
+    /**
+     * Helper method to calculate grade point from score
+     */
+    private function calculateGradePoint($score): float
+    {
+        if ($score >= 70) return 5.0;
+        if ($score >= 60) return 4.0;
+        if ($score >= 50) return 3.0;
+        if ($score >= 45) return 2.0;
+        if ($score >= 40) return 1.0;
+        return 0.0;
+    }
+    
+    /**
+     * Helper method to get letter grade from score
+     */
+    private function getLetterGrade($score): string
+    {
+        if ($score >= 70) return 'A';
+        if ($score >= 60) return 'B';
+        if ($score >= 50) return 'C';
+        if ($score >= 45) return 'D';
+        if ($score >= 40) return 'E';
+        return 'F';
+    }
+    
+    /**
+     * Validate student access to resource
+     */
+    private function validateStudentAccess($resourceStudentId): bool
+    {
+        $authUser = Auth::user();
+        $student = Student::where('user_id', $authUser->id)->first();
+        
+        return $student && $student->id == $resourceStudentId;
     }
 }

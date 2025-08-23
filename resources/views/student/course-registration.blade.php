@@ -24,312 +24,369 @@
         </div>
     @endif
     
-    @if(session('error'))
+    @if(session('error') || isset($error))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong>Error!</strong> {{ session('error') }}
+            <strong>Error!</strong> {{ session('error') ?? $error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            @if(isset($feePaymentRequired) && $feePaymentRequired)
+                <hr>
+                <a href="{{ route('student.payments.fees') }}" class="btn btn-warning btn-sm">
+                    <i class="fas fa-credit-card me-1"></i> Pay School Fees
+                </a>
+            @endif
+        </div>
+    @endif
+
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Warning!</strong> {{ session('warning') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <!-- Registration Information -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card card-round">
-                <div class="card-header">
-                    <div class="card-head-row">
-                        <div class="card-title">Course Registration - Current Semester</div>
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-success btn-sm" id="submitRegistrationBtn">
-                                <i class="fas fa-check me-1"></i> Submit Registration
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <form id="courseRegistrationForm" method="POST" action="{{ route('student.course-registration.store') }}">
-                        @csrf
-                        
-                        <!-- Student Information -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-2">Student Information</h6>
-                                <p class="mb-1"><strong>Name:</strong> {{ Auth::user()->name }}</p>
-                                <p class="mb-1"><strong>Matric Number:</strong> {{ Auth::user()->student->matric_number ?? 'Not Assigned' }}</p>
-                                <p class="mb-1"><strong>Programme:</strong> {{ $student->programme->name ?? 'Not Set' }}</p>
-                                <p class="mb-0"><strong>Level:</strong> {{ $student->current_level ?? '100 Level' }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <h6 class="text-muted mb-2">Registration Summary</h6>
-                                <p class="mb-1"><strong>Total Courses:</strong> <span id="totalCourses">0</span></p>
-                                <p class="mb-1"><strong>Total Units:</strong> <span id="totalUnits">0</span></p>
-                                <p class="mb-1"><strong>Min Units Required:</strong> 15</p>
-                                <p class="mb-0"><strong>Max Units Allowed:</strong> 24</p>
-                            </div>
-                        </div>
-
-                        <!-- Course Selection -->
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th width="50">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="selectAll">
-                                                <label class="form-check-label" for="selectAll"></label>
-                                            </div>
-                                        </th>
-                                        <th>Course Code</th>
-                                        <th>Course Title</th>
-                                        <th>Units</th>
-                                        <th>Type</th>
-                                        <th>Semester</th>
-                                        <th>Prerequisites</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($availableCourses as $course)
-                                        <tr>
-                                            <td>
-                                                <div class="form-check">
-                                                    <input class="form-check-input course-checkbox" 
-                                                           type="checkbox" 
-                                                           name="courses[]" 
-                                                           value="{{ $course->id }}" 
-                                                           id="course_{{ $course->id }}"
-                                                           data-units="3"
-                                                           {{ in_array($course->id, $registeredCourseIds) ? 'checked' : '' }}>
-                                                    <label class="form-check-label" for="course_{{ $course->id }}"></label>
-                                                </div>
-                                            </td>
-                                            <td><strong>{{ $course->code }}</strong></td>
-                                            <td>{{ $course->title }}</td>
-                                            <td>
-                                                <span class="badge bg-primary">3 Units</span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-danger">
-                                                    Compulsory
-                                                </span>
-                                            </td>
-                                            <td>{{ $course->semester->semester_name ?? 'Current' }}</td>
-                                            <td>
-                                                <small class="text-muted">None</small>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="7" class="text-center py-4">
-                                                <div class="empty-state">
-                                                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
-                                                    <h5 class="text-muted">No Courses Available</h5>
-                                                    <p class="text-muted">No courses are available for registration at this time.</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        @if($canRegister ?? true)
-                            <div class="mt-4">
-                                <button type="submit" class="btn btn-primary me-2">
-                                    <i class="fas fa-save me-1"></i> Save Registration
-                                </button>
-                                <button type="button" class="btn btn-secondary" id="clearSelectionBtn">
-                                    <i class="fas fa-times me-1"></i> Clear Selection
-                                </button>
-                            </div>
-                        @endif
-                    </form>
-                </div>
-            </div>
+    <!-- Registration Deadline Notice -->
+    @if(isset($currentSemester) && $currentSemester && $currentSemester->registration_end_date)
+        @php
+            $daysRemaining = \Carbon\Carbon::now()->diffInDays($currentSemester->registration_end_date, false);
+        @endphp
+        <div class="alert {{ $daysRemaining >= 0 ? 'alert-info' : 'alert-danger' }} alert-dismissible fade show" role="alert">
+            <i class="fas fa-clock me-2"></i>
+            <strong>Registration Deadline:</strong> 
+            Course registration closes on {{ \Carbon\Carbon::parse($currentSemester->registration_end_date)->format('F j, Y') }}
+            @if($daysRemaining >= 0)
+                ({{ $daysRemaining }} day{{ $daysRemaining != 1 ? 's' : '' }} remaining)
+            @else
+                <span class="text-danger">(Registration Closed)</span>
+            @endif
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    @endif
 
-        <div class="col-md-4">
-            <!-- Registration Guidelines -->
-            <div class="card card-round">
-                <div class="card-header">
-                    <div class="card-title">Registration Guidelines</div>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-info-circle me-1"></i> Important Notes:</h6>
-                        <ul class="mb-0 ps-3">
-                            <li>Minimum {{ $minUnits ?? 15 }} units required</li>
-                            <li>Maximum {{ $maxUnits ?? 24 }} units allowed</li>
-                            <li>All compulsory courses must be selected</li>
-                            <li>Check prerequisites before selecting courses</li>
-                            <li>Registration deadline: {{ $registrationDeadline ?? 'TBA' }}</li>
-                        </ul>
-                    </div>
-                    
-                    <div class="mt-3">
-                        <h6>Course Types:</h6>
-                        <div class="mb-2">
-                            <span class="badge bg-danger me-1">Compulsory</span>
-                            <small class="text-muted">Must be taken</small>
-                        </div>
-                        <div class="mb-2">
-                            <span class="badge bg-info me-1">Elective</span>
-                            <small class="text-muted">Optional courses</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Registration History -->
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Course Registration Form -->
             <div class="card card-round">
                 <div class="card-header">
                     <div class="card-head-row">
-                        <div class="card-title">Recent Registrations</div>
+                        <div class="card-title">
+                            Current Semester Course Registration
+                            @if(isset($currentSemester) && $currentSemester)
+                                <small class="text-muted d-block">{{ $currentSemester->semester_name }} - {{ $currentSemester->schoolSession->session_name ?? 'Current Session' }}</small>
+                            @endif
+                        </div>
                         <div class="card-tools">
-                            <a href="{{ route('student.course-registration.history') }}" class="btn btn-link btn-sm">
-                                View All
+                            <a href="{{ route('student.course-registration.history') }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-history me-1"></i> View History
                             </a>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    @forelse($recentRegistrations ?? [] as $registration)
-                        <div class="d-flex align-items-center mb-3">
-                            <div class="avatar avatar-sm me-3">
-                                <div class="avatar-title bg-{{ $registration['status_color'] ?? 'primary' }} rounded-circle">
-                                    <i class="fas fa-book"></i>
+                    @if(isset($student) && $student)
+                        <!-- Student Information -->
+                        <div class="row mb-4 p-3 bg-light rounded">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Student:</strong> {{ $student->user->name ?? $student->applicant_name }}</p>
+                                <p class="mb-1"><strong>Matric Number:</strong> {{ $student->matric_number ?? 'Not Assigned' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Programme:</strong> {{ $student->programme->name ?? 'Not Set' }}</p>
+                                <p class="mb-1"><strong>Level:</strong> {{ $student->level->name ?? 'Not Set' }}</p>
+                            </div>
+                        </div>
+
+                        @if(!isset($feePaymentRequired) || !$feePaymentRequired)
+                            @if(isset($canRegister) && $canRegister)
+                                <form method="POST" action="{{ route('student.course-registration.store') }}" id="courseRegistrationForm">
+                                    @csrf
+                                    
+                                    <!-- Available Courses -->
+                                    <div class="mb-4">
+                                        <h5 class="text-primary mb-3">
+                                            <i class="fas fa-book me-2"></i>Available Courses
+                                        </h5>
+                                        
+                                        @if($availableCourses->count() > 0)
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th width="50px">
+                                                                <input type="checkbox" id="selectAll" class="form-check-input">
+                                                            </th>
+                                                            <th>Course Code</th>
+                                                            <th>Course Title</th>
+                                                            <th>Credit Units</th>
+                                                            <th>Type</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($availableCourses as $course)
+                                                            <tr class="course-row">
+                                                                <td>
+                                                                    <input type="checkbox" 
+                                                                           name="courses[]" 
+                                                                           value="{{ $course->id }}" 
+                                                                           class="form-check-input course-checkbox"
+                                                                           data-units="{{ $course->credit_units }}"
+                                                                           @if(in_array($course->id, $registeredCourseIds)) checked @endif>
+                                                                </td>
+                                                                <td><strong>{{ $course->code }}</strong></td>
+                                                                <td>{{ $course->title }}</td>
+                                                                <td>
+                                                                    <span class="badge bg-primary">{{ $course->credit_units }} Units</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge bg-{{ isset($course->course_type) && strtolower($course->course_type) === 'compulsory' ? 'danger' : 'info' }}">
+                                                                        {{ $course->course_type ?? 'Elective' }}
+                                                                    </span>
+                                                                </td>
+                                                                <td>
+                                                                    @if(in_array($course->id, $registeredCourseIds))
+                                                                        <span class="badge bg-success">Registered</span>
+                                                                    @else
+                                                                        <span class="badge bg-secondary">Available</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                                <div>
+                                                    <span class="text-muted">Selected: </span>
+                                                    <span id="selectedCount" class="badge bg-info">{{ count($registeredCourseIds) }}</span>
+                                                    <span class="text-muted ms-3">Total Units: </span>
+                                                    <span id="totalUnits" class="badge bg-success">{{ $totalUnits ?? 0 }}</span>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                                    <i class="fas fa-save me-1"></i> Update Registration
+                                                </button>
+                                            </div>
+
+                                            <!-- Unit Guidelines -->
+                                            <div class="mt-3 p-3 bg-light rounded">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    <strong>Guidelines:</strong> 
+                                                    Minimum: 15 units | Maximum: 24 units | 
+                                                    <span class="text-warning">Warning shown for units below 15 or above 24</span>
+                                                </small>
+                                            </div>
+                                        @else
+                                            <div class="text-center py-5">
+                                                <i class="fas fa-book fa-4x text-muted mb-3"></i>
+                                                <h4 class="text-muted">No Courses Available</h4>
+                                                <p class="text-muted">No courses are currently available for registration in your programme and level.</p>
+                                                <div class="mt-3">
+                                                    <a href="{{ route('student.support') }}" class="btn btn-outline-primary">
+                                                        <i class="fas fa-headset me-1"></i> Contact Support
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </form>
+                            @else
+                                <div class="text-center py-5">
+                                    <i class="fas fa-lock fa-4x text-muted mb-3"></i>
+                                    <h4 class="text-muted">Registration Not Available</h4>
+                                    <p class="text-muted">Course registration is currently not available.</p>
                                 </div>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0">{{ $registration['semester'] ?? 'Unknown Semester' }}</h6>
-                                <small class="text-muted">{{ $registration['courses_count'] ?? 0 }} courses, {{ $registration['total_units'] ?? 0 }} units</small>
-                            </div>
-                            <span class="badge bg-{{ $registration['status_color'] ?? 'secondary' }}">
-                                {{ $registration['status'] ?? 'Unknown' }}
-                            </span>
+                            @endif
+                        @endif
+                    @else
+                        <div class="text-center py-5">
+                            <i class="fas fa-user-times fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">Student Profile Not Found</h4>
+                            <p class="text-muted">Please contact the administration to complete your student registration.</p>
                         </div>
-                    @empty
-                        <div class="text-center py-3">
-                            <i class="fas fa-history fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">No previous registrations</p>
-                        </div>
-                    @endforelse
+                    @endif
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Confirmation Modal -->
-    <div class="modal fade" id="confirmRegistrationModal" tabindex="-1" aria-labelledby="confirmRegistrationModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmRegistrationModalLabel">Confirm Course Registration</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="col-md-4">
+            <!-- Registration Summary -->
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-title">Registration Summary</div>
                 </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to submit your course registration?</p>
-                    <div class="alert alert-warning">
-                        <strong>Note:</strong> Once submitted, you may not be able to modify your registration without approval.
-                    </div>
-                    <div id="registrationSummary">
-                        <h6>Registration Summary:</h6>
-                        <p><strong>Total Courses:</strong> <span id="modalTotalCourses">0</span></p>
-                        <p><strong>Total Units:</strong> <span id="modalTotalUnits">0</span></p>
-                    </div>
+                <div class="card-body">
+                    @if(isset($student) && $student && isset($registeredCourses))
+                        <div class="mb-3">
+                            <h6 class="text-muted">Currently Registered Courses</h6>
+                            @if($registeredCourses->count() > 0)
+                                <div class="max-height-200" style="max-height: 300px; overflow-y: auto;">
+                                    @foreach($registeredCourses as $registration)
+                                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-light rounded">
+                                            <div>
+                                                <small class="fw-bold">{{ $registration->course->code }}</small>
+                                                <div class="text-muted small">{{ Str::limit($registration->course->title, 25) }}</div>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-primary d-block mb-1">{{ $registration->course->credit_units }} Units</span>
+                                                <span class="badge bg-{{ $registration->status == 'approved' ? 'success' : ($registration->status == 'pending' ? 'warning' : 'secondary') }}">
+                                                    {{ ucfirst($registration->status) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <strong>Total Courses:</strong>
+                                    <span class="badge bg-info">{{ $registeredCourses->count() }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <strong>Total Units:</strong>
+                                    <span class="badge bg-success">{{ $totalUnits ?? 0 }} Units</span>
+                                </div>
+                            @else
+                                <p class="text-muted small">No courses registered yet.</p>
+                            @endif
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-muted">Registration Guidelines</h6>
+                            <ul class="list-unstyled small text-muted">
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Select all required courses for your level</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Minimum units per semester: 15</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Maximum units per semester: 24</li>
+                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Ensure fees are paid before registration</li>
+                                <li><i class="fas fa-clock text-info me-2"></i>Registration deadline must be observed</li>
+                            </ul>
+                        </div>
+                    @endif
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmSubmitBtn">
-                        <i class="fas fa-check me-1"></i> Confirm Registration
-                    </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-title">Quick Actions</div>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('student.course-registration.history') }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-history me-1"></i> Registration History
+                        </a>
+                        <a href="{{ route('student.payments.fees') }}" class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-credit-card me-1"></i> Fee Payments
+                        </a>
+                        <a href="{{ route('student.results') }}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-chart-line me-1"></i> Academic Results
+                        </a>
+                        <a href="{{ route('student.support') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-headset me-1"></i> Get Support
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
-$(document).ready(function() {
-    const minUnits = {{ $minUnits ?? 15 }};
-    const maxUnits = {{ $maxUnits ?? 24 }};
-    
-    // Update totals when checkboxes change
-    function updateTotals() {
-        let totalCourses = 0;
-        let totalUnits = 0;
+    $(document).ready(function() {
+        // Initialize tooltips
+        $('[data-bs-toggle="tooltip"]').tooltip();
         
-        $('.course-checkbox:checked').each(function() {
-            totalCourses++;
-            totalUnits += parseInt($(this).data('units'));
+        // Calculate initial total units
+        updateRegistrationSummary();
+        
+        // Select/Deselect all courses
+        $('#selectAll').on('change', function() {
+            $('.course-checkbox').prop('checked', $(this).is(':checked'));
+            updateRegistrationSummary();
         });
         
-        $('#totalCourses').text(totalCourses);
-        $('#totalUnits').text(totalUnits);
-        $('#modalTotalCourses').text(totalCourses);
-        $('#modalTotalUnits').text(totalUnits);
+        // Individual course selection
+        $('.course-checkbox').on('change', function() {
+            updateRegistrationSummary();
+            
+            // Update select all checkbox
+            var totalCheckboxes = $('.course-checkbox').length;
+            var checkedCheckboxes = $('.course-checkbox:checked').length;
+            $('#selectAll').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
+            $('#selectAll').prop('checked', checkedCheckboxes === totalCheckboxes);
+        });
         
-        // Validate units
-        if (totalUnits < minUnits) {
-            $('#totalUnits').removeClass('text-success text-danger').addClass('text-warning');
-        } else if (totalUnits > maxUnits) {
-            $('#totalUnits').removeClass('text-success text-warning').addClass('text-danger');
-        } else {
-            $('#totalUnits').removeClass('text-warning text-danger').addClass('text-success');
+        // Form submission validation
+        $('#courseRegistrationForm').on('submit', function(e) {
+            var selectedCourses = $('.course-checkbox:checked').length;
+            var totalUnits = parseInt($('#totalUnits').text()) || 0;
+            
+            if (selectedCourses === 0) {
+                e.preventDefault();
+                alert('Please select at least one course to register.');
+                return false;
+            }
+            
+            if (totalUnits < 15) {
+                if (!confirm('You have selected ' + totalUnits + ' units which is below the recommended minimum of 15 units. Do you want to continue?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            
+            if (totalUnits > 24) {
+                if (!confirm('You have selected ' + totalUnits + ' units which exceeds the recommended maximum of 24 units. Do you want to continue?')) {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            
+            $('#submitBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Processing...');
+        });
+        
+        function updateRegistrationSummary() {
+            var selectedCount = $('.course-checkbox:checked').length;
+            var totalUnits = 0;
+            
+            $('.course-checkbox:checked').each(function() {
+                totalUnits += parseInt($(this).data('units')) || 0;
+            });
+            
+            $('#selectedCount').text(selectedCount);
+            $('#totalUnits').text(totalUnits);
+            
+            // Update submit button state
+            if (selectedCount > 0) {
+                $('#submitBtn').prop('disabled', false);
+            } else {
+                $('#submitBtn').prop('disabled', true);
+            }
+            
+            // Color coding for units
+            var unitsElement = $('#totalUnits');
+            unitsElement.removeClass('bg-success bg-warning bg-danger');
+            
+            if (totalUnits < 15) {
+                unitsElement.addClass('bg-warning');
+            } else if (totalUnits > 24) {
+                unitsElement.addClass('bg-danger');
+            } else {
+                unitsElement.addClass('bg-success');
+            }
         }
-    }
-    
-    // Course checkbox change event
-    $('.course-checkbox').change(function() {
-        updateTotals();
-    });
-    
-    // Select all functionality
-    $('#selectAll').change(function() {
-        $('.course-checkbox').prop('checked', $(this).is(':checked'));
-        updateTotals();
-    });
-    
-    // Clear selection
-    $('#clearSelectionBtn').click(function() {
-        $('.course-checkbox, #selectAll').prop('checked', false);
-        updateTotals();
-    });
-    
-    // Submit registration button
-    $('#submitRegistrationBtn').click(function() {
-        const totalUnits = parseInt($('#totalUnits').text());
         
-        if (totalUnits < minUnits) {
-            alert(`You must register for at least ${minUnits} units.`);
-            return;
-        }
-        
-        if (totalUnits > maxUnits) {
-            alert(`You cannot register for more than ${maxUnits} units.`);
-            return;
-        }
-        
-        $('#confirmRegistrationModal').modal('show');
+        // Auto-refresh page if registration deadline passes
+        @if(isset($currentSemester) && $currentSemester && $currentSemester->registration_end_date)
+            var deadlineTime = new Date('{{ $currentSemester->registration_end_date }}').getTime();
+            var now = new Date().getTime();
+            
+            if (deadlineTime > now) {
+                var timeToDeadline = deadlineTime - now;
+                setTimeout(function() {
+                    location.reload();
+                }, timeToDeadline + 1000); // Refresh 1 second after deadline
+            }
+        @endif
     });
-    
-    // Confirm submit
-    $('#confirmSubmitBtn').click(function() {
-        $('#courseRegistrationForm').append('<input type="hidden" name="submit_registration" value="1">');
-        $('#courseRegistrationForm').submit();
-    });
-    
-    // Form validation
-    $('#courseRegistrationForm').submit(function(e) {
-        const totalUnits = parseInt($('#totalUnits').text());
-        
-        if (totalUnits < minUnits || totalUnits > maxUnits) {
-            e.preventDefault();
-            alert(`Please select courses between ${minUnits} and ${maxUnits} units.`);
-        }
-    });
-    
-    // Initialize totals
-    updateTotals();
-});
 </script>
-@endpush
+@endsection
