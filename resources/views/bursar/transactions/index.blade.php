@@ -65,7 +65,7 @@
                                         <td>
                                             @if($transaction->paymentable)
                                                 @if($transaction->paymentable_type === 'App\Models\SchoolFeePayment')
-                                                    {{ $transaction->paymentable->student->surname ?? 'N/A' }} {{ $transaction->paymentable->student->othernames ?? '' }}
+                                                    {{ $transaction->paymentable->student->applicant_name ?? 'N/A' }} {{ $transaction->paymentable->student->othernames ?? '' }}
                                                 @elseif($transaction->paymentable->application)
                                                     {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
                                                 @else

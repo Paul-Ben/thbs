@@ -65,14 +65,14 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>
                                         @if($payment->student)
-                                            {{ $payment->student->surname }} {{ $payment->student->othernames }}
+                                            {{ $payment->student->applicant_name }} {{ $payment->student->othernames }}
                                         @else
                                             N/A
                                         @endif
                                     </td>
                                     <td>
                                         @if($payment->student)
-                                            {{ $payment->student->student_id }}
+                                            {{ $payment->student->matric_number }}
                                         @else
                                             N/A
                                         @endif
