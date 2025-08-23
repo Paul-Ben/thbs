@@ -38,7 +38,7 @@ class PaymentService
             'redirect_url' => route('payment.callback'),
             'customer' => [
                 'email' => $data['email'],
-                'name' => $data['surname'] . ' ' . ($data['othernames'] ?? ''),
+                'name' => isset($data['name']) ? $data['name'] : ($data['surname'] . ' ' . ($data['othernames'] ?? '')),
                 'phone_number' => $data['phone'] ?? 'N/A'
             ],
             'customizations' => [
