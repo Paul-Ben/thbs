@@ -152,7 +152,7 @@
                                         <td>
                                             <code>{{ $payment->reference }}</code>
                                         </td>
-                                        <td>{{ $payment->schoolFee->session->session_name ?? 'N/A' }}</td>
+                                        <td>{{ $payment->schoolFee->schoolSession->session_name ?? 'N/A' }}</td>
                                         <td>
                                             <strong class="text-primary">₦{{ number_format($payment->amount, 2) }}</strong>
                                         </td>
