@@ -307,7 +307,7 @@ class StudentController extends Controller
     public function courseRegistrationHistory(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::with('user')->where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.course-registration-history')->with([
@@ -414,7 +414,7 @@ class StudentController extends Controller
     public function paymentHistory(): View
     {
         $authUser = Auth::user();
-        $student = $authUser->student;
+        $student = Student::with('user')->where('user_id', $authUser->id)->first();
         
         if (!$student) {
             return view('student.payment-history')->with([
