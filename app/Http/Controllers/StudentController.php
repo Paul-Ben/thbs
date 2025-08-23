@@ -398,59 +398,14 @@ class StudentController extends Controller
     }
     
     /**
-     * Process fee payment
+     * Process fee payment (Legacy method - now handled by PaymentController)
+     * This method is kept for backward compatibility but redirects to the new payment flow
      */
-    public function processPayment(Request $request): JsonResponse
+    public function processPayment(Request $request): RedirectResponse
     {
-        $request->validate([
-            'school_fee_id' => 'required|exists:school_fees,id',
-            'amount' => 'required|numeric|min:1',
-            'payment_method' => 'required|in:card,bank_transfer,mobile_money'
-        ]);
-        
-        $student = Auth::user()->student;
-        
-        if (!$student) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Student profile not found. Please contact the administration to complete your student registration.'
-            ], 404);
-        }
-        
-        $schoolFee = SchoolFee::findOrFail($request->school_fee_id);
-        
-        // Verify the fee belongs to the student
-        if ($schoolFee->student_id !== $student->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized access to fee record'
-            ], 403);
-        }
-        
-        // Create payment record
-        $payment = SchoolFeePayment::create([
-            'student_id' => $student->id,
-            'school_fee_id' => $schoolFee->id,
-            'amount' => $request->amount,
-            'payment_method' => $request->payment_method,
-            'reference' => 'PAY_' . time() . '_' . $student->id,
-            'status' => 'pending'
-        ]);
-        
-        // Here you would integrate with actual payment gateway
-        // For now, we'll simulate a successful payment
-        $payment->update(['status' => 'successful']);
-        
-        // Update school fee if fully paid
-        if ($payment->amount >= $schoolFee->amount) {
-            $schoolFee->update(['status' => 'paid']);
-        }
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment processed successfully!',
-            'payment_id' => $payment->id
-        ]);
+        // Redirect to the new payment initialization route
+        return redirect()->route('payment.initialize')
+            ->with('error', 'Please use the Pay Now button to process payments.');
     }
     
     /**
@@ -466,7 +421,14 @@ class StudentController extends Controller
                 'error' => 'Student profile not found. Please contact the administration to complete your student registration.',
                 'authUser' => $authUser,
                 'student' => null,
-                'payments' => collect()->paginate(15)
+                'payments' => collect()->paginate(15),
+                'totalPaid' => 0,
+                'totalPayments' => 0,
+                'successfulPayments' => 0,
+                'pendingPayments' => 0,
+                'averagePayment' => 0,
+                'lastPaymentDate' => null,
+                'availableSessions' => collect()
             ]);
         }
         
@@ -475,7 +437,44 @@ class StudentController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(15);
             
-        return view('student.payment-history', compact('authUser', 'student', 'payments'));
+        // Calculate payment statistics
+        $totalPaid = SchoolFeePayment::where('student_id', $student->id)
+            ->where('status', 'successful')
+            ->sum('amount');
+            
+        $totalPayments = SchoolFeePayment::where('student_id', $student->id)
+            ->count();
+            
+        $successfulPayments = SchoolFeePayment::where('student_id', $student->id)
+            ->where('status', 'successful')
+            ->count();
+            
+        $pendingPayments = SchoolFeePayment::where('student_id', $student->id)
+            ->where('status', 'pending')
+            ->count();
+            
+        $averagePayment = $successfulPayments > 0 ? $totalPaid / $successfulPayments : 0;
+        
+        $lastPaymentDate = SchoolFeePayment::where('student_id', $student->id)
+            ->where('status', 'successful')
+            ->latest('payment_date')
+            ->value('payment_date');
+            
+        // Get available sessions for filter
+        $availableSessions = \App\Models\SchoolSession::orderBy('session_name', 'desc')->get();
+            
+        return view('student.payment-history', compact(
+            'authUser', 
+            'student', 
+            'payments', 
+            'totalPaid', 
+            'totalPayments', 
+            'successfulPayments',
+            'pendingPayments',
+            'averagePayment', 
+            'lastPaymentDate',
+            'availableSessions'
+        ));
     }
     
     /**
