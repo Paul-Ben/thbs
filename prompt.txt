@@ -1,3 +1,4 @@
+-- migrations
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -6,6 +7,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('departments', function (Blueprint $table) {
@@ -17,7 +21,7 @@ return new class extends Migration
 
         Schema::create('school_sessions', function (Blueprint $table) {
             $table->id();
-            $table->string('session_name');
+            $table->string('session_name'); // e.g., "2024/2025"
             $table->year('year');
             $table->boolean('is_current')->default(0);
             $table->timestamps();
@@ -25,7 +29,7 @@ return new class extends Migration
 
         Schema::create('application_sessions', function (Blueprint $table) {
             $table->id();
-            $table->string('session_name');
+            $table->string('session_name'); // e.g., "2024/2025"
             $table->year('year');
             $table->boolean('is_current')->default(0);
             $table->timestamps();
@@ -33,11 +37,9 @@ return new class extends Migration
 
         Schema::create('semesters', function (Blueprint $table) {
             $table->id();
-            $table->string('semester_name');
+            $table->string('semester_name'); // e.g., "First Semester"
             $table->foreignId('school_session_id')->constrained();
             $table->boolean('is_current')->default(false);
-            $table->date('registration_start_date')->nullable();
-            $table->date('registration_end_date')->nullable();
             $table->timestamps();
         });
 
@@ -61,7 +63,6 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->string('title');
-            $table->integer('credit_units')->default(3);
             $table->foreignId('level_id')->constrained();
             $table->foreignId('programme_id')->constrained();
             $table->foreignId('semester_id')->constrained();
@@ -113,7 +114,7 @@ return new class extends Migration
             $table->string('lga');
             $table->foreignId('programme_id')->constrained();
             $table->string('date_of_birth');
-            $table->string('passport');
+            $table->string('passport'); // file path or filename
             $table->string('credential');
             $table->foreignId('user_id')->constrained();
             $table->foreignId('application_id')->constrained();
@@ -128,7 +129,6 @@ return new class extends Migration
             $table->foreignId('school_session_id')->constrained();
             $table->foreignId('semester_id')->constrained();
             $table->foreignId('level_id')->constrained();
-            $table->enum('status', ['draft', 'submitted', 'approved', 'declined'])->default('draft');
             $table->timestamps();
 
             $table->unique(['student_id', 'course_id', 'semester_id']);
@@ -143,15 +143,19 @@ return new class extends Migration
             $table->foreignId('level_id')->constrained();
             $table->decimal('score', 5, 2);
             $table->string('grade', 2);
-            $table->decimal('grade_point', 3, 2)->nullable();
             $table->timestamps();
 
             $table->unique(['student_id', 'course_id', 'semester_id']);
         });
     }
 
+
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
+        // Drop in reverse dependency order
         Schema::dropIfExists('results');
         Schema::dropIfExists('course_registrations');
         Schema::dropIfExists('students');
@@ -165,3 +169,224 @@ return new class extends Migration
         Schema::dropIfExists('departments');
     }
 };
+
+
+
+-- models
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Course extends Model
+{
+    use HasFactory;
+    
+    
+    protected $fillable = ['code', 'title', 'programme_id', 'level_id', 'semester_id'];
+
+    public function programme()
+    {
+        return $this->belongsTo(Programme::class);
+    }
+
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class);
+    }
+
+    
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
+    }
+
+    public function courseRegistrations()
+    {
+        return $this->hasMany(CourseRegistration::class);
+    }
+
+    public function results()
+    {
+        return $this->hasMany(Result::class);
+    }
+}
+
+
+
+---
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class CourseRegistration extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['student_id', 'course_id', 'semester_id'];
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class);
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function semester()
+    {
+        return $this->belongsTo(Semester::class);
+    }
+}
+
+
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Student extends Model
+{
+  use HasFactory;
+    protected $fillable = [
+        'applicant_name',
+        'matric_number',
+        'email',
+        'gender',
+        'phone',
+        'address',
+        'country',
+        'state_of_origin',
+        'lga',
+        'programme_id',
+        'date_of_birth',
+        'passport',
+        'credential',
+        'user_id',
+        'application_id'
+    ];
+
+    public function programme()
+    {
+        return $this->belongsTo(Programme::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function application()
+    {
+        return $this->belongsTo(Application::class);
+    }
+
+    public function courseRegistrations()
+    {
+        return $this->hasMany(CourseRegistration::class);
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
+    }
+
+    public function results()
+    {
+        return $this->hasMany(Result::class);
+    }
+}
+
+
+-- controllers
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Course;
+use App\Models\Programme;
+use App\Models\Level;
+use App\Models\Semester;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+
+class CourseController extends Controller
+{
+    public function index()
+    {
+        $authUser = Auth::user();
+        $courses = Course::with(['programme', 'level', 'semester'])->paginate(15);
+        return view('superadmin.courses.index', compact('courses', 'authUser'));       
+    }
+
+    public function create()
+    {
+        $programmes = Programme::all();
+        $levels = Level::all();
+        $semesters = Semester::all();
+        return view('superadmin.courses.create', compact('programmes', 'levels', 'semesters'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string|max:255|unique:courses,code',
+            'title' => 'required|string|max:255',
+            'programme_id' => 'required|exists:programmes,id',
+            'level_id' => 'required|exists:levels,id',
+            'semester_id' => 'required|exists:semesters,id',
+        ]);
+
+        Course::create($request->all());
+
+        return Redirect::route('superadmin.courses.index')->with('success', 'Course created successfully.');
+    }
+
+    public function show(Course $course)
+    {
+        $course->load(['programme', 'level', 'semester']);
+        return view('superadmin.courses.show', compact('course'));
+    }
+
+    public function edit(Course $course)
+    {
+        $programmes = Programme::all();
+        $levels = Level::all();
+        $semesters = Semester::all();
+        return view('superadmin.courses.edit', compact('course', 'programmes', 'levels', 'semesters'));
+    }
+
+    public function update(Request $request, Course $course)
+    {
+        $request->validate([
+            'code' => 'required|string|max:255|unique:courses,code,' . $course->id,
+            'title' => 'required|string|max:255',
+            'programme_id' => 'required|exists:programmes,id',
+            'level_id' => 'required|exists:levels,id',
+            'semester_id' => 'required|exists:semesters,id',
+        ]);
+
+        $course->update($request->all());
+
+        return Redirect::route('superadmin.courses.index')->with('success', 'Course updated successfully.');
+    }
+
+    public function destroy(Course $course)
+    {
+        $course->delete();
+        return Redirect::route('superadmin.courses.index')->with('success', 'Course deleted successfully.');
+    }
+}
+
+
+

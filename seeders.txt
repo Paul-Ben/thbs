@@ -2,6 +2,57 @@
 
 namespace Database\Seeders;
 
+
+use Illuminate\Database\Seeder;
+use App\Models\Semester;
+use App\Models\SchoolSession;
+
+
+class SemesterSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+
+     */
+    public function run(): void
+    {
+        // Ensure there is at least one school session
+        $currentSession = SchoolSession::where('is_current', true)->first();
+        if (!$currentSession) {
+            $currentSession = SchoolSession::first();
+        }
+
+        if (!$currentSession) {
+            $this->command->warn('No school sessions found. Run SchoolSession seeder first.');
+            return;
+        }
+
+        $semesters = [
+            ['semester_name' => 'First Semester',  'school_session_id' => $currentSession->id, 'is_current' => true],
+            ['semester_name' => 'Second Semester', 'school_session_id' => $currentSession->id, 'is_current' => false],
+        ];
+
+        foreach ($semesters as $data) {
+            Semester::firstOrCreate(
+                [
+                    'semester_name' => $data['semester_name'],
+                    'school_session_id' => $data['school_session_id'],
+                ],
+                [
+                    'is_current' => $data['is_current'],
+                ]
+            );
+        }
+    }
+}
+
+
+
+
+<?php
+
+namespace Database\Seeders;
+
 use App\Models\Course;
 use App\Models\Programme;
 use App\Models\Semester;
@@ -100,7 +151,6 @@ class CourseSeeder extends Seeder
                     'programme_id' => $nursingProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level100_firstSem->id,
-                    'credit_units' => 2,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: NUR101 - Introduction to Nursing');
@@ -113,7 +163,6 @@ class CourseSeeder extends Seeder
                     'programme_id' => $medicineProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level100_firstSem->id,
-                    'credit_units' => 3,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: MED101 - Human Anatomy I');
@@ -131,7 +180,6 @@ class CourseSeeder extends Seeder
                     'programme_id' => $nursingProgramme->id,
                     'semester_id' => $secondSemester->id,
                     'level_id' => $level100_secondSem->id,
-                    'credit_units' => 1,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: NUR102 - Fundamentals of Nursing Practice');
@@ -144,7 +192,6 @@ class CourseSeeder extends Seeder
                     'programme_id' => $medicineProgramme->id,
                     'semester_id' => $secondSemester->id,
                     'level_id' => $level100_secondSem->id,
-                    'credit_units' => 2,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: MED102 - Human Physiology I');
@@ -162,7 +209,6 @@ class CourseSeeder extends Seeder
                     'programme_id' => $nursingProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level200_firstSem->id,
-                    'credit_units' => 3,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: NUR201 - Medical-Surgical Nursing');
@@ -175,7 +221,6 @@ class CourseSeeder extends Seeder
                     'programme_id' => $medicineProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level200_firstSem->id,
-                    'credit_units' => 2,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: MED201 - Medical Biochemistry');
@@ -194,3 +239,4 @@ class CourseSeeder extends Seeder
         }
     }
 }
+
