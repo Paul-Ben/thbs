@@ -98,7 +98,7 @@
         <p>Thank you for your prompt payment!</p>
         
         <p>Best regards,<br>
-        <strong>The Hillside Business School</strong><br>
+        <strong>Institute of Health & Tech. BSUTH</strong><br>
         Bursar's Office</p>
     </div>
     
