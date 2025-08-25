@@ -158,65 +158,127 @@
             </div>
             @endif
 
-            <!-- Applicant Information Card -->
-            @if($transaction->paymentable && $transaction->paymentable->application)
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h4 class="card-title">Applicant Information</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Application Number</label>
-                                <p class="form-control-static">{{ $transaction->paymentable->application->application_number ?? 'Not Generated' }}</p>
-                            </div>
+            <!-- Payer Information Card -->
+            @if($transaction->paymentable)
+                @if($transaction->paymentable_type === 'App\Models\SchoolFeePayment')
+                    <!-- Student Information Card -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h4 class="card-title">Student Information</h4>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Full Name</label>
-                                <p class="form-control-static">
-                                    {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
-                                </p>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Student ID</label>
+                                        <p class="form-control-static">{{ $transaction->paymentable->student->student_id ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Full Name</label>
+                                        <p class="form-control-static">
+                                            {{ $transaction->paymentable->student->surname ?? 'N/A' }} {{ $transaction->paymentable->student->othernames ?? '' }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Email</label>
-                                <p class="form-control-static">{{ $transaction->paymentable->application->email }}</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Email</label>
+                                        <p class="form-control-static">{{ $transaction->paymentable->student->email ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Phone</label>
+                                        <p class="form-control-static">{{ $transaction->paymentable->student->phone ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Phone</label>
-                                <p class="form-control-static">{{ $transaction->paymentable->application->phone ?? 'N/A' }}</p>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Programme</label>
-                                <p class="form-control-static">
-                                    {{ $transaction->paymentable->application->programme ? $transaction->paymentable->application->programme->name : 'Not Assigned' }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label fw-bold">Application Status</label>
-                                <p class="form-control-static">
-                                    <span class="badge badge-info">{{ ucfirst($transaction->paymentable->application->status ?? 'pending') }}</span>
-                                </p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">School Fee</label>
+                                        <p class="form-control-static">
+                                            {{ $transaction->paymentable->schoolFee->name ?? 'N/A' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Academic Session</label>
+                                        <p class="form-control-static">
+                                            {{ $transaction->paymentable->schoolFee->academic_session ?? 'N/A' }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                @elseif($transaction->paymentable->application)
+                    <!-- Applicant Information Card -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h4 class="card-title">Applicant Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Application Number</label>
+                                        <p class="form-control-static">{{ $transaction->paymentable->application->application_number ?? 'Not Generated' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Full Name</label>
+                                        <p class="form-control-static">
+                                            {{ $transaction->paymentable->application->applicant_surname }} {{ $transaction->paymentable->application->applicant_othernames }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Email</label>
+                                        <p class="form-control-static">{{ $transaction->paymentable->application->email }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Phone</label>
+                                        <p class="form-control-static">{{ $transaction->paymentable->application->phone ?? 'N/A' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Programme</label>
+                                        <p class="form-control-static">
+                                            {{ $transaction->paymentable->application->programme ? $transaction->paymentable->application->programme->name : 'Not Assigned' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Application Status</label>
+                                        <p class="form-control-static">
+                                            <span class="badge badge-info">{{ ucfirst($transaction->paymentable->application->status ?? 'pending') }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             @endif
         </div>
 

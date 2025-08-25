@@ -47,6 +47,14 @@ class PaymentController extends Controller
         }
     }
 
+    public function initializeSchoolFee(Request $request): RedirectResponse
+    {
+        // Set payment type to school_fee for this protected route
+        $request->merge(['payment_type' => 'school_fee']);
+        
+        return $this->initialize($request);
+    }
+
     public function callback(Request $request): RedirectResponse
     {
         try {

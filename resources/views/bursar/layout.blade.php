@@ -93,7 +93,7 @@
                                         </a>
                                     </li>
                                     <li class="{{ request()->routeIs('bursar.payments.school') ? 'active' : '' }}">
-                                        <a href="#" onclick="alert('School Fees module coming soon!')">
+                                        <a href="{{ route('bursar.payments.school') }}">
                                             <span class="sub-item">School Fees</span>
                                         </a>
                                     </li>

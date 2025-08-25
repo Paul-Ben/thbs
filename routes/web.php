@@ -32,9 +32,17 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/', [ApplicationController::class, 'landing'])->name('application.landing');
 
+// Payment routes that don't require authentication
 Route::post('/payment/initialize', [PaymentController::class, 'initialize'])->name('payment.initialize');
 Route::get('/payment/callback', [PaymentController::class, 'callback'])->name('payment.callback');
 Route::get('/payment/success', function() { return view('payment.success'); })->name('payment.success');
+
+// Protected payment routes
+Route::middleware('auth')->group(function () {
+    Route::post('/payment/school-fee/initialize', [PaymentController::class, 'initializeSchoolFee'])->name('payment.school-fee.initialize');
+    
+
+});
 
 Route::get('/application/apply/{tx_ref}', [ApplicationController::class, 'create'])->name('application.create');
 Route::post('/application/{tx_ref}', [ApplicationController::class, 'store'])->name('application.store');
@@ -131,6 +139,8 @@ Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('bursar.dashboard');
     Route::get('/payments/application', [BursarController::class, 'payments'])->name('bursar.payments.application');
     Route::get('/payment/{payment}', [BursarController::class, 'showPayment'])->name('bursar.payment.show');
+    Route::get('/payments/school-fees', [BursarController::class, 'schoolFeePayments'])->name('bursar.payments.school');
+    Route::get('/school-fee-payment/{payment}', [BursarController::class, 'showSchoolFeePayment'])->name('bursar.school-fee-payment.show');
     Route::get('/transactions', [BursarController::class, 'transactions'])->name('bursar.transactions');
     Route::get('/transaction/{transaction}', [BursarController::class, 'showTransaction'])->name('bursar.transaction.show');
     Route::patch('/transaction/{transaction}/reconcile', [BursarController::class, 'reconcileTransaction'])->name('bursar.transaction.reconcile');

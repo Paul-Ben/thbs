@@ -6,9 +6,11 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Mailable;
 use App\Mail\PaymentSuccessful;
 use App\Mail\AptitudeTestPaymentSuccessful;
+use App\Mail\SchoolFeePaymentSuccessful;
 use App\Mail\ApplicationSubmitted;
 use App\Models\ApplicationFeePayment;
 use App\Models\AptitudeTestPayment;
+use App\Models\SchoolFeePayment;
 use App\Models\Application;
 
 class NotificationService
@@ -16,16 +18,20 @@ class NotificationService
     /**
      * Send payment successful notification
      */
-    public function sendPaymentSuccessfulNotification(ApplicationFeePayment|AptitudeTestPayment $payment): void
+    public function sendPaymentSuccessfulNotification(ApplicationFeePayment|AptitudeTestPayment|SchoolFeePayment $payment): void
     {
-        $payment->load('application');
-
         if ($payment instanceof ApplicationFeePayment) {
+            $payment->load('application');
             Mail::to($payment->application->email)
                 ->send(new PaymentSuccessful($payment));
         } elseif ($payment instanceof AptitudeTestPayment) {
+            $payment->load('application');
             Mail::to($payment->application->email)
                 ->send(new AptitudeTestPaymentSuccessful($payment));
+        } elseif ($payment instanceof SchoolFeePayment) {
+            $payment->load(['student.user', 'schoolFee.schoolSession', 'schoolFee.semester']);
+            Mail::to($payment->student->user->email)
+                ->send(new SchoolFeePaymentSuccessful($payment));
         }
     }
 
