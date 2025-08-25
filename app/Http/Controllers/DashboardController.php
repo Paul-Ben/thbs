@@ -6,6 +6,8 @@ use App\Models\ApplicationFeePayment;
 use App\Models\AptitudeTestPayment;
 use App\Models\SchoolFeePayment;
 use App\Models\Transaction;
+use App\Models\Application;
+use App\Models\Admission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -54,7 +56,9 @@ class DashboardController extends Controller
           if ($authUser->userRole == "Superadmin") {
             return view('superadmin.dashboard', compact('authUser'))->with('success', 'Login Successful');
           } else if ($authUser->userRole == "Admission Officer") {
-            return view('admission_officer.dashboard', compact('authUser'));
+            $applicationsCount = Application::count();
+            $admittedCount = Admission::where('status', 'approved')->count();
+            return view('admission_officer.dashboard', compact('authUser', 'applicationsCount', 'admittedCount'));
           } else if ($authUser->userRole == "Bursar") {
             return view('bursar.dashboard', compact(
                 'authUser', 

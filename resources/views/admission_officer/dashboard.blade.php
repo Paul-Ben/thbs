@@ -29,7 +29,7 @@
                         <div class="col col-stats ms-3 ms-sm-0">
                             <div class="numbers">
                                 <p class="card-category">Applications</p>
-                                <h4 class="card-title">1,294</h4>
+                                <h4 class="card-title">{{ number_format($applicationsCount ?? 0) }}</h4>
                             </div>
                         </div>
                     </div>
@@ -48,7 +48,7 @@
                         <div class="col col-stats ms-3 ms-sm-0">
                             <div class="numbers">
                                 <p class="card-category">Admitted</p>
-                                <h4 class="card-title">1,303</h4>
+                                <h4 class="card-title">{{ number_format($admittedCount ?? 0) }}</h4>
                             </div>
                         </div>
                     </div>
