@@ -16,8 +16,8 @@ class SemesterController extends Controller
      */
     public function index(): View
     {
-        $authUser = Auth::user();
-        $semesters = Semester::with('session')
+        $authUser = Auth::user();    
+        $semesters = Semester::with('schoolSession')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -42,10 +42,11 @@ class SemesterController extends Controller
         $validated = $request->validate([
             'semester_name' => 'required|string|max:255',
             'school_session_id' => 'required|exists:school_sessions,id',
-            'is_current' => 'boolean'
+            'is_current' => 'boolean',
+            'registration_start_date' => 'nullable|date',
+            'registration_end_date' => 'nullable|date|after_or_equal:registration_start_date'
         ]);
 
-        // If this semester is set as current, unset all other current semesters
         if ($request->has('is_current') && $request->is_current) {
             Semester::where('is_current', true)->update(['is_current' => false]);
             $validated['is_current'] = true;
@@ -64,8 +65,8 @@ class SemesterController extends Controller
      */
     public function show(Semester $semester): View
     {
-        $authUser = Auth::user();
-        $semester->load(['session', 'courses', 'courseRegistrations', 'results']);
+        $authUser = Auth::user();    
+        $semester->load(['schoolSession', 'courses', 'courseRegistrations', 'results']);
         
         // Get statistics
         $stats = [
@@ -85,8 +86,8 @@ class SemesterController extends Controller
     public function edit(Semester $semester): View
     {
         $authUser = Auth::user();
-        $schoolSessions = SchoolSession::orderBy('session_name', 'desc')->get();
-        $semester->load(['session', 'courses', 'courseRegistrations']);
+        $schoolSessions = SchoolSession::orderBy('session_name', 'desc')->get();    
+        $semester->load(['schoolSession', 'courses', 'courseRegistrations']);
         
         return view('superadmin.semesters.edit', compact('semester', 'schoolSessions', 'authUser'));
     }
@@ -99,10 +100,12 @@ class SemesterController extends Controller
         $validated = $request->validate([
             'semester_name' => 'required|string|max:255',
             'school_session_id' => 'required|exists:school_sessions,id',
-            'is_current' => 'boolean'
+            'is_current' => 'boolean',
+            'registration_start_date' => 'nullable|date',
+            'registration_end_date' => 'nullable|date|after_or_equal:registration_start_date'
         ]);
 
-        // If this semester is set as current, unset all other current semesters
+ 
         if ($request->has('is_current') && $request->is_current) {
             Semester::where('id', '!=', $semester->id)
                 ->where('is_current', true)
@@ -144,10 +147,9 @@ class SemesterController extends Controller
      */
     public function setCurrent(Semester $semester): RedirectResponse
     {
-        // Unset all current semesters
-        Semester::where('is_current', true)->update(['is_current' => false]);
-        
-        // Set this semester as current
+     
+        Semester::where('is_current', true)->update(['is_current' => false]);        
+       
         $semester->update(['is_current' => true]);
 
         return redirect()->route('superadmin.semesters.index')

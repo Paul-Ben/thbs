@@ -34,27 +34,37 @@
                     </div>
                     
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Credit Units:</label>
+                                <p class="form-control-static">
+                                    <span class="badge bg-success fs-6">
+                                        {{ $course->credit_units }} {{ $course->credit_units == 1 ? 'Unit' : 'Units' }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Programme:</label>
                                 <p class="form-control-static">
-                                    <span class="badge bg-info">{{ $course->programme->name }}</span>
+                                    <span class="badge bg-info fs-6">{{ $course->programme->name }}</span>
                                 </p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Level:</label>
                                 <p class="form-control-static">
-                                    <span class="badge bg-secondary">{{ $course->level->name }}</span>
+                                    <span class="badge bg-secondary fs-6">{{ $course->level->name }}</span>
                                 </p>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Semester:</label>
                                 <p class="form-control-static">
-                                    <span class="badge bg-primary">{{ $course->semester->semester_name }}</span>
+                                    <span class="badge bg-primary fs-6">{{ $course->semester->semester_name }}</span>
                                 </p>
                             </div>
                         </div>

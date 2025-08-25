@@ -189,6 +189,8 @@ Route::prefix('it')->middleware(['auth', 'role:IT Admin'])->group(function () {
     Route::get('/dashboard', function () { return view('it.dashboard'); })->name('it.dashboard');
 });
 
+// Updated Student Routes Section - Replace the existing student routes in web.php
+
 Route::prefix('student')->middleware(['auth', 'role:Student'])->group(function () {
     Route::get('/dashboard', [StudentController::class, 'dashboard'])->name('student.dashboard');
     
@@ -197,12 +199,12 @@ Route::prefix('student')->middleware(['auth', 'role:Student'])->group(function (
     Route::put('/biodata', [StudentController::class, 'updateBiodata'])->name('student.biodata.update');
     Route::post('/biodata/photo', [StudentController::class, 'updatePhoto'])->name('student.biodata.photo');
     
-    // Course registration routes
+    // Course registration routes -
     Route::get('/course-registration', [StudentController::class, 'courseRegistration'])->name('student.course-registration.current');
     Route::post('/course-registration', [StudentController::class, 'storeCourseRegistration'])->name('student.course-registration.store');
     Route::get('/course-registration/history', [StudentController::class, 'courseRegistrationHistory'])->name('student.course-registration.history');
     
-    // Payment routes
+    // Payment routes 
     Route::get('/payments/fees', [StudentController::class, 'feePayments'])->name('student.payments.fees');
     Route::post('/payments/process', [StudentController::class, 'processPayment'])->name('student.payments.process');
     Route::get('/payments/history', [StudentController::class, 'paymentHistory'])->name('student.payments.history');
@@ -210,7 +212,7 @@ Route::prefix('student')->middleware(['auth', 'role:Student'])->group(function (
     
     // Results routes
     Route::get('/results', [StudentController::class, 'results'])->name('student.results');
-    Route::get('/results/{semester}', [StudentController::class, 'semesterResults'])->name('student.results.semester');
+    Route::get('/results/semester/{semester}', [StudentController::class, 'resultsBySemester'])->name('student.results.semester');
     
     // Support route
     Route::get('/support', [StudentController::class, 'support'])->name('student.support');

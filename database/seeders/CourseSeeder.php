@@ -100,6 +100,7 @@ class CourseSeeder extends Seeder
                     'programme_id' => $nursingProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level100_firstSem->id,
+                    'credit_units' => 2,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: NUR101 - Introduction to Nursing');
@@ -112,6 +113,7 @@ class CourseSeeder extends Seeder
                     'programme_id' => $medicineProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level100_firstSem->id,
+                    'credit_units' => 3,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: MED101 - Human Anatomy I');
@@ -129,6 +131,7 @@ class CourseSeeder extends Seeder
                     'programme_id' => $nursingProgramme->id,
                     'semester_id' => $secondSemester->id,
                     'level_id' => $level100_secondSem->id,
+                    'credit_units' => 1,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: NUR102 - Fundamentals of Nursing Practice');
@@ -141,6 +144,7 @@ class CourseSeeder extends Seeder
                     'programme_id' => $medicineProgramme->id,
                     'semester_id' => $secondSemester->id,
                     'level_id' => $level100_secondSem->id,
+                    'credit_units' => 2,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: MED102 - Human Physiology I');
@@ -158,6 +162,7 @@ class CourseSeeder extends Seeder
                     'programme_id' => $nursingProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level200_firstSem->id,
+                    'credit_units' => 3,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: NUR201 - Medical-Surgical Nursing');
@@ -170,6 +175,7 @@ class CourseSeeder extends Seeder
                     'programme_id' => $medicineProgramme->id,
                     'semester_id' => $firstSemester->id,
                     'level_id' => $level200_firstSem->id,
+                    'credit_units' => 2,
                 ]);
                 $coursesCreated++;
                 $this->command->info('Created: MED201 - Medical Biochemistry');

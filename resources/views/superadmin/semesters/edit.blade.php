@@ -53,6 +53,24 @@
                                         <strong>Updated:</strong> {{ $semester->updated_at->format('M d, Y') }}
                                     </div>
                                 </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <strong>School Session:</strong> 
+                                        @if($semester->schoolSession)
+                                            {{ $semester->schoolSession->session_name }}
+                                        @else
+                                            <span class="text-danger">No Session Assigned</span>
+                                        @endif
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Registration Period:</strong>
+                                        @if($semester->registration_start_date && $semester->registration_end_date)
+                                            {{ $semester->registration_start_date->format('M d, Y') }} - {{ $semester->registration_end_date->format('M d, Y') }}
+                                        @else
+                                            <span class="text-muted">Not Set</span>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -111,6 +129,49 @@
                                     <div class="form-text">
                                         <i class="fas fa-info-circle"></i> 
                                         Select the school session this semester belongs to
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Registration Period Fields --}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="registration_start_date" class="form-label">
+                                        <i class="fas fa-calendar-plus"></i> Registration Start Date
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control @error('registration_start_date') is-invalid @enderror" 
+                                           id="registration_start_date" 
+                                           name="registration_start_date" 
+                                           value="{{ old('registration_start_date', $semester->registration_start_date?->format('Y-m-d')) }}">
+                                    @error('registration_start_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> 
+                                        When students can start registering for courses
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="registration_end_date" class="form-label">
+                                        <i class="fas fa-calendar-minus"></i> Registration End Date
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control @error('registration_end_date') is-invalid @enderror" 
+                                           id="registration_end_date" 
+                                           name="registration_end_date" 
+                                           value="{{ old('registration_end_date', $semester->registration_end_date?->format('Y-m-d')) }}">
+                                    @error('registration_end_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> 
+                                        When course registration closes
                                     </div>
                                 </div>
                             </div>
@@ -190,6 +251,24 @@ $(document).ready(function() {
     $('#school_session_id option[data-current="true"]').css({
         'background-color': '#d4edda',
         'font-weight': 'bold'
+    });
+
+    // Date validation
+    $('#registration_start_date').on('change', function() {
+        const startDate = $(this).val();
+        if (startDate) {
+            $('#registration_end_date').attr('min', startDate);
+        }
+    });
+
+    $('#registration_end_date').on('change', function() {
+        const endDate = $(this).val();
+        const startDate = $('#registration_start_date').val();
+        
+        if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+            alert('Registration end date must be after start date');
+            $(this).val('');
+        }
     });
 });
 </script>

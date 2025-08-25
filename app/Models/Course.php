@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,8 +10,14 @@ class Course extends Model
 {
     use HasFactory;
     
-    
-    protected $fillable = ['code', 'title', 'programme_id', 'level_id', 'semester_id'];
+    protected $fillable = [
+        'code', 
+        'title', 
+        'credit_units', 
+        'programme_id', 
+        'level_id', 
+        'semester_id'
+    ];
 
     public function programme()
     {
@@ -21,7 +28,6 @@ class Course extends Model
     {
         return $this->belongsTo(Semester::class);
     }
-
     
     public function level()
     {

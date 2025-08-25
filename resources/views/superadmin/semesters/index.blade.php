@@ -35,6 +35,7 @@
                                     <th>ID</th>
                                     <th>Semester Name</th>
                                     <th>School Session</th>
+                                    <th>Registration Period</th>
                                     <th>Status</th>
                                     <th>Created Date</th>
                                     <th>Actions</th>
@@ -46,9 +47,24 @@
                                         <td>{{ $semester->id }}</td>
                                         <td>{{ $semester->semester_name }}</td>
                                         <td>
-                                            <span class="badge bg-info">
-                                                {{ $semester->session->session_name }}
-                                            </span>
+                                            {{-- Fix: Use schoolSession instead of session --}}
+                                            @if($semester->schoolSession)
+                                                <span class="badge bg-info">
+                                                    {{ $semester->schoolSession->session_name }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-danger">No Session</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($semester->registration_start_date && $semester->registration_end_date)
+                                                <small>
+                                                    <strong>Start:</strong> {{ $semester->registration_start_date->format('M d, Y') }}<br>
+                                                    <strong>End:</strong> {{ $semester->registration_end_date->format('M d, Y') }}
+                                                </small>
+                                            @else
+                                                <span class="text-muted">Not Set</span>
+                                            @endif
                                         </td>
                                         <td>
                                             @if($semester->is_current)
@@ -99,7 +115,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">
+                                        <td colspan="7" class="text-center">
                                             <div class="py-4">
                                                 <i class="fas fa-calendar-alt fa-3x text-muted mb-3"></i>
                                                 <h5 class="text-muted">No semesters found</h5>
