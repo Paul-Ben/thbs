@@ -75,7 +75,30 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="credit_units" class="form-label">
+                                        <i class="fas fa-star"></i> Credit Units <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select @error('credit_units') is-invalid @enderror" 
+                                            id="credit_units" 
+                                            name="credit_units" 
+                                            required>
+                                        <option value="">Select Units</option>
+                                        @for($i = 1; $i <= 6; $i++)
+                                            <option value="{{ $i }}" 
+                                                    {{ old('credit_units', 3) == $i ? 'selected' : '' }}>
+                                                {{ $i }} {{ $i == 1 ? 'Unit' : 'Units' }}
+                                            </option>
+                                        @endfor
+                                    </select>
+                                    @error('credit_units')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="programme_id" class="form-label">
                                         <i class="fas fa-graduation-cap"></i> Programme <span class="text-danger">*</span>
@@ -98,7 +121,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="level_id" class="form-label">
                                         <i class="fas fa-layer-group"></i> Level <span class="text-danger">*</span>
@@ -121,7 +144,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="mb-3">
                                     <label for="semester_id" class="form-label">
                                         <i class="fas fa-calendar-alt"></i> Semester <span class="text-danger">*</span>
@@ -155,6 +178,7 @@
                                     <h6><i class="fas fa-lightbulb"></i> Quick Tips:</h6>
                                     <ul class="mb-0">
                                         <li>Course codes must be unique across the system</li>
+                                        <li>Credit units typically range from 1-6 (default is 3)</li>
                                         <li>Each course must be associated with a programme, level, and semester</li>
                                         <li>Courses will be available for registration based on their level and semester</li>
                                     </ul>

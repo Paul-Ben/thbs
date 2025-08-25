@@ -87,6 +87,49 @@
                             </div>
                         </div>
 
+                        {{-- Registration Period Fields --}}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="registration_start_date" class="form-label">
+                                        <i class="fas fa-calendar-plus"></i> Registration Start Date
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control @error('registration_start_date') is-invalid @enderror" 
+                                           id="registration_start_date" 
+                                           name="registration_start_date" 
+                                           value="{{ old('registration_start_date') }}">
+                                    @error('registration_start_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> 
+                                        When students can start registering for courses
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="registration_end_date" class="form-label">
+                                        <i class="fas fa-calendar-minus"></i> Registration End Date
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control @error('registration_end_date') is-invalid @enderror" 
+                                           id="registration_end_date" 
+                                           name="registration_end_date" 
+                                           value="{{ old('registration_end_date') }}">
+                                    @error('registration_end_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle"></i> 
+                                        When course registration closes
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="mb-3">
@@ -116,6 +159,7 @@
                                     <ul class="mb-0">
                                         <li>Semester names should be descriptive and follow your institution's naming convention</li>
                                         <li>Each semester must be associated with a school session</li>
+                                        <li>Registration dates are optional but recommended for automated course registration control</li>
                                         <li>Only one semester can be marked as "current" at a time</li>
                                         <li>You can change the current semester status later from the semester list</li>
                                     </ul>
@@ -152,6 +196,24 @@ $(document).ready(function() {
     if (!$('#school_session_id').val()) {
         $('#school_session_id option[data-current="true"]').prop('selected', true);
     }
+
+    // Date validation
+    $('#registration_start_date').on('change', function() {
+        const startDate = $(this).val();
+        if (startDate) {
+            $('#registration_end_date').attr('min', startDate);
+        }
+    });
+
+    $('#registration_end_date').on('change', function() {
+        const endDate = $(this).val();
+        const startDate = $('#registration_start_date').val();
+        
+        if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+            alert('Registration end date must be after start date');
+            $(this).val('');
+        }
+    });
 });
 </script>
 @endpush
