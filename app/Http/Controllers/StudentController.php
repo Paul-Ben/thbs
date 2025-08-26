@@ -50,13 +50,13 @@ class StudentController extends Controller
             })
             ->count();
             
-        // Use the new GPA calculation method
+    
         $currentCGPA = $student->calculateGPA() ?? 0;
         
         $currentLevel = $student->current_level ?? ($student->level->name ?? '100 Level');
         
-        // Get outstanding fees
-        $outstandingFees = $this->getOutstandingFees($student);
+        
+        $outstandingFees = $student->getOutstandingFees();
         
         // Recent activities
         $recentActivities = collect()
@@ -274,8 +274,8 @@ class StudentController extends Controller
             $deadlineMessage = 'Course registration has closed for this semester.';
         }
         
-        // Check fee payment status before allowing registration
-        $hasPaidFees = $this->checkFeePayment($student);
+        // Check fee payment status before allowing registration using the new model method
+        $hasPaidFees = $student->hasPaidFeesForCurrentSemester();
         if (!$hasPaidFees && $canRegister) {
             $canRegister = false;
             return view('student.course-registration')->with([
@@ -358,8 +358,8 @@ class StudentController extends Controller
                 ->with('error', 'Course registration has closed for this semester.');
         }
         
-        // Check fee payment status
-        $hasPaidFees = $this->checkFeePayment($student);
+        // Check fee payment status using the new model method
+        $hasPaidFees = $student->hasPaidFeesForCurrentSemester();
         if (!$hasPaidFees) {
             return redirect()->route('student.course-registration.current')
                 ->with('error', 'You must pay your school fees to register for courses.');
@@ -382,7 +382,7 @@ class StudentController extends Controller
         // Calculate total units
         $totalUnits = $validCourses->sum('credit_units');
         
-        // Optional: Validate unit limits (with warnings, not hard stops)
+        // Optional: Validate unit limits 
         $warningMessage = null;
         if ($totalUnits > 24) {
             $warningMessage = 'You have selected ' . $totalUnits . ' units which exceeds the recommended maximum of 24 units.';
@@ -392,12 +392,12 @@ class StudentController extends Controller
         
         try {
             DB::transaction(function() use ($request, $student, $currentSemester) {
-                // Remove existing registrations for this semester
+                
                 CourseRegistration::where('student_id', $student->id)
                     ->where('semester_id', $currentSemester->id)
                     ->delete();
                 
-                // Create new registrations
+                
                 $registrations = [];
                 foreach ($request->courses as $courseId) {
                     $registrations[] = [
@@ -430,77 +430,6 @@ class StudentController extends Controller
             return redirect()->route('student.course-registration.current')
                 ->with('error', 'An error occurred while processing your registration. Please try again.');
         }
-    }
-    
-    /**
-     * Check if student has paid fees for current semester
-     */
-    private function checkFeePayment(Student $student): bool
-    {
-        $currentSession = SchoolSession::where('is_current', true)->first();
-        $currentSemester = Semester::where('is_current', true)->first();
-
-        if (!$currentSession || !$currentSemester) {
-            return true; // No current session/semester defined, allow registration
-        }
-
-        // Check if a fee record exists for this student, session, and semester
-        $requiredFee = SchoolFee::where('programme_id', $student->programme_id)
-            ->where('school_session_id', $currentSession->id)
-            ->where('semester_id', $currentSemester->id)
-            ->when($student->level_id, function($query) use ($student) {
-                $query->where('level_id', $student->level_id);
-            })
-            ->where('is_active', true)
-            ->first();
-
-        if (!$requiredFee) {
-            return true; // No fee defined, so student can proceed
-        }
-
-        $totalPaid = SchoolFeePayment::where('student_id', $student->id)
-            ->where('school_fee_id', $requiredFee->id)
-            ->where('status', 'successful')
-            ->sum('amount');
-
-        return $totalPaid >= $requiredFee->amount;
-    }
-    
-    /**
-     * Get outstanding fees for student
-     */
-    private function getOutstandingFees(Student $student): float
-    {
-        $currentSession = SchoolSession::where('is_current', true)->first();
-        $currentSemester = Semester::where('is_current', true)->first();
-        
-        if (!$currentSession || !$currentSemester) {
-            return 0;
-        }
-        
-        $activeFees = SchoolFee::where('programme_id', $student->programme_id)
-            ->where('school_session_id', $currentSession->id)
-            ->where('semester_id', $currentSemester->id)
-            ->when($student->level_id, function($query) use ($student) {
-                $query->where('level_id', $student->level_id);
-            })
-            ->where('is_active', true)
-            ->get();
-            
-        $totalOutstanding = 0;
-        foreach ($activeFees as $fee) {
-            $totalPaid = SchoolFeePayment::where('student_id', $student->id)
-                ->where('school_fee_id', $fee->id)
-                ->where('status', 'successful')
-                ->sum('amount');
-                
-            $outstanding = $fee->amount - $totalPaid;
-            if ($outstanding > 0) {
-                $totalOutstanding += $outstanding;
-            }
-        }
-        
-        return $totalOutstanding;
     }
     
     /**
@@ -619,7 +548,7 @@ class StudentController extends Controller
         $currentSession = SchoolSession::where('is_current', true)->first();
         $currentSemester = Semester::where('is_current', true)->first();
         
-        // Get active school fees for the student's programme, current session, semester, and level
+      
         $activeFees = SchoolFee::where('programme_id', $student->programme_id) 
             ->where('school_session_id', $currentSession?->id)
             ->where('semester_id', $currentSemester?->id)
@@ -658,8 +587,8 @@ class StudentController extends Controller
             ->limit(10)
             ->get();
         
-        // Calculate payment summary
-        $totalOutstanding = $outstandingFees->sum('remaining_amount');
+        // Calculate payment summary using the new model method
+        $totalOutstanding = $student->getOutstandingFees();
         $totalPaid = SchoolFeePayment::where('student_id', $student->id)
             ->where('status', 'successful')
             ->sum('amount');
@@ -951,8 +880,8 @@ class StudentController extends Controller
             $message = 'Course registration has closed for this semester.';
         }
         
-        // Check fee payment
-        if ($canRegister && !$this->checkFeePayment($student)) {
+        // Check fee payment using the new model method
+        if ($canRegister && !$student->hasPaidFeesForCurrentSemester()) {
             $canRegister = false;
             $message = 'You must pay your school fees to register for courses.';
         }
