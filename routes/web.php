@@ -12,6 +12,7 @@ use App\Http\Controllers\SchoolSessionController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\AdmissionController;
 
 use App\Http\Controllers\DepartmentController;
 
@@ -132,7 +133,15 @@ Route::prefix('department')->middleware(['auth', 'role:Department Admin'])->grou
 Route::prefix('admissions')->middleware(['auth', 'role:Admission Officer'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admissions.dashboard');
     Route::get('/applications', [ApplicationController::class, 'applications'])->name('admissions.applications');
+    Route::get('/applications/export', [ApplicationController::class, 'exportApplications'])->name('admissions.applications.export');
     Route::get('/application/{application}/show', [ApplicationController::class, 'show'])->name('admissions.application.show');
+
+    Route::get('/list', [AdmissionController::class, 'index'])->name('admission_officer.admissions');
+    Route::get('/list/{admission}/show', [AdmissionController::class, 'show'])->name('admission_officer.admissions.show');
+    Route::delete('/list/{admission}', [AdmissionController::class, 'destroy'])->name('admission_officer.admissions.destroy');
+    Route::get('/export', [AdmissionController::class, 'exportAdmissions'])->name('admissions.export');
+    Route::post('/import', [AdmissionController::class, 'importAdmissions'])->name('admission_officer.admissions.import');
+    Route::get('/template/download', [AdmissionController::class, 'downloadTemplate'])->name('admissions.template.download');
 });
 
 Route::prefix('bursar')->middleware(['auth', 'role:Bursar'])->group(function () {

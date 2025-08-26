@@ -14,4 +14,9 @@ class ApplicationSession extends Model
     {
         return $this->hasMany(Application::class);
     }
+
+    public function admissions()
+    {
+        return $this->hasMany(Admission::class);
+    }
 } 

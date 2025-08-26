@@ -68,6 +68,11 @@ class Application extends Model
         return $this->belongsTo(SchoolSession::class);
     }
 
+    public function applicationSession()
+    {
+        return $this->belongsTo(ApplicationSession::class);
+    }
+
     public function applicationFeePayments()
     {
         return $this->hasMany(ApplicationFeePayment::class, 'reference', 'payment_reference');
@@ -76,6 +81,11 @@ class Application extends Model
     public function aptitudeTestFees()
     {
         return $this->hasMany(AptitudeTestFee::class, 'application_id', 'id');
+    }
+
+    public function aptitudeTestPayments()
+    {
+        return $this->hasMany(AptitudeTestPayment::class, 'application_id', 'id');
     }
 
     public function hasSuccessfulPayment()

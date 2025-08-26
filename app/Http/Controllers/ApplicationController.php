@@ -17,6 +17,8 @@ use App\Models\AptitudeTestFee;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\NotificationService;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ApplicationsExport;
 
 class ApplicationController extends Controller
 {
@@ -146,5 +148,10 @@ class ApplicationController extends Controller
         $oLevelRecords = $application->academicRecords->where('level', 'O/LEVEL')->values();
         $aLevelRecords = $application->academicRecords->where('level', 'A/LEVEL')->values();
         return view('admission_officer.show', compact('application', 'oLevelRecords', 'aLevelRecords'));
+    }
+
+    public function exportApplications()
+    {
+        return Excel::download(new ApplicationsExport, 'applications.xlsx');
     }
 }

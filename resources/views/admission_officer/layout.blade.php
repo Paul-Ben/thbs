@@ -115,21 +115,17 @@
                         <li class="nav-item">
                             <a data-bs-toggle="collapse" href="#sidebarLayouts">
                                 <i class="fas fa-credit-card"></i>
-                                <p>Payments</p>
+                                <p>Admissions</p>
                                 <span class="caret"></span>
                             </a>
                             <div class="collapse" id="sidebarLayouts">
                                 <ul class="nav nav-collapse">
                                     <li>
-                                        <a href="sidebar-style-2.html">
-                                            <span class="sub-item"> Application Payments</span>
+                                        <a href="{{ route('admission_officer.admissions') }}">
+                                            <span class="sub-item">All Admissions</span>
                                         </a>
                                     </li>
-                                    <li>
-                                        <a href="icon-menu.html">
-                                            <span class="sub-item">Acceptance Payments</span>
-                                        </a>
-                                    </li>
+                                   
                                 </ul>
                             </div>
                         </li>

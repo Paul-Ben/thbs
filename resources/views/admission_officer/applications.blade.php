@@ -24,8 +24,12 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Applicants List</h4>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title mb-0">Applicants List</h4>
+                    <a href="{{ route('admissions.applications.export') }}" class="btn btn-success btn-round btn-sm">
+                        <i class="fa fa-file-excel"></i>
+                        Export Applications
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
