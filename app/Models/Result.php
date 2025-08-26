@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,16 @@ class Result extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['student_id', 'course_id', 'semester_id', 'score', 'grade'];
+    protected $fillable = [
+        'student_id',
+        'course_id',
+        'school_session_id',
+        'semester_id',
+        'level_id',
+        'score',
+        'grade',
+        'grade_point'
+    ];
 
     public function student()
     {
@@ -21,8 +31,18 @@ class Result extends Model
         return $this->belongsTo(Course::class);
     }
 
+    public function schoolSession()
+    {
+        return $this->belongsTo(SchoolSession::class);
+    }
+
     public function semester()
     {
         return $this->belongsTo(Semester::class);
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
     }
 }

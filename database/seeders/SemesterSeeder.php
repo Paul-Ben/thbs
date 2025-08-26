@@ -2,21 +2,15 @@
 
 namespace Database\Seeders;
 
-
 use Illuminate\Database\Seeder;
 use App\Models\Semester;
 use App\Models\SchoolSession;
-
+use Carbon\Carbon;
 
 class SemesterSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-
-     */
     public function run(): void
     {
-        // Ensure there is at least one school session
         $currentSession = SchoolSession::where('is_current', true)->first();
         if (!$currentSession) {
             $currentSession = SchoolSession::first();
@@ -28,8 +22,20 @@ class SemesterSeeder extends Seeder
         }
 
         $semesters = [
-            ['semester_name' => 'First Semester',  'school_session_id' => $currentSession->id, 'is_current' => true],
-            ['semester_name' => 'Second Semester', 'school_session_id' => $currentSession->id, 'is_current' => false],
+            [
+                'semester_name' => 'First Semester',
+                'school_session_id' => $currentSession->id,
+                'is_current' => true,
+                'registration_start_date' => Carbon::now()->subWeeks(2)->toDateString(),
+                'registration_end_date' => Carbon::now()->addWeeks(2)->toDateString(),
+            ],
+            [
+                'semester_name' => 'Second Semester',
+                'school_session_id' => $currentSession->id,
+                'is_current' => false,
+                'registration_start_date' => Carbon::now()->addMonths(4)->toDateString(),
+                'registration_end_date' => Carbon::now()->addMonths(5)->toDateString(),
+            ],
         ];
 
         foreach ($semesters as $data) {
@@ -40,9 +46,10 @@ class SemesterSeeder extends Seeder
                 ],
                 [
                     'is_current' => $data['is_current'],
+                    'registration_start_date' => $data['registration_start_date'],
+                    'registration_end_date' => $data['registration_end_date'],
                 ]
             );
         }
     }
 }
-

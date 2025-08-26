@@ -35,6 +35,7 @@
                                     <th>ID</th>
                                     <th>Course Code</th>
                                     <th>Course Title</th>
+                                    <th>Credit Units</th>
                                     <th>Programme</th>
                                     <th>Level</th>
                                     <th>Semester</th>
@@ -47,6 +48,11 @@
                                         <td>{{ $course->id }}</td>
                                         <td><strong>{{ $course->code }}</strong></td>
                                         <td>{{ $course->title }}</td>
+                                        <td>
+                                            <span class="badge bg-success">
+                                                {{ $course->credit_units }} {{ $course->credit_units == 1 ? 'Unit' : 'Units' }}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span class="badge bg-info">
                                                 {{ $course->programme->name }}
@@ -87,7 +93,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="7" class="text-center">
+                                        <td colspan="8" class="text-center">
                                             <div class="py-4">
                                                 <i class="fas fa-book fa-3x text-muted mb-3"></i>
                                                 <h5 class="text-muted">No courses found</h5>

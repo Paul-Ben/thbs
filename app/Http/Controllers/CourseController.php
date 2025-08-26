@@ -32,6 +32,7 @@ class CourseController extends Controller
         $request->validate([
             'code' => 'required|string|max:255|unique:courses,code',
             'title' => 'required|string|max:255',
+            'credit_units' => 'required|integer|min:1|max:6',
             'programme_id' => 'required|exists:programmes,id',
             'level_id' => 'required|exists:levels,id',
             'semester_id' => 'required|exists:semesters,id',
@@ -61,6 +62,7 @@ class CourseController extends Controller
         $request->validate([
             'code' => 'required|string|max:255|unique:courses,code,' . $course->id,
             'title' => 'required|string|max:255',
+            'credit_units' => 'required|integer|min:1|max:6',
             'programme_id' => 'required|exists:programmes,id',
             'level_id' => 'required|exists:levels,id',
             'semester_id' => 'required|exists:semesters,id',

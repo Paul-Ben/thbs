@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('departments', function (Blueprint $table) {
@@ -20,7 +17,7 @@ return new class extends Migration
 
         Schema::create('school_sessions', function (Blueprint $table) {
             $table->id();
-            $table->string('session_name'); // e.g., "2024/2025"
+            $table->string('session_name');
             $table->year('year');
             $table->boolean('is_current')->default(0);
             $table->timestamps();
@@ -28,7 +25,7 @@ return new class extends Migration
 
         Schema::create('application_sessions', function (Blueprint $table) {
             $table->id();
-            $table->string('session_name'); // e.g., "2024/2025"
+            $table->string('session_name');
             $table->year('year');
             $table->boolean('is_current')->default(0);
             $table->timestamps();
@@ -36,9 +33,11 @@ return new class extends Migration
 
         Schema::create('semesters', function (Blueprint $table) {
             $table->id();
-            $table->string('semester_name'); // e.g., "First Semester"
+            $table->string('semester_name');
             $table->foreignId('school_session_id')->constrained();
             $table->boolean('is_current')->default(false);
+            $table->date('registration_start_date')->nullable();
+            $table->date('registration_end_date')->nullable();
             $table->timestamps();
         });
 
@@ -62,6 +61,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->string('title');
+            $table->integer('credit_units')->default(3);
             $table->foreignId('level_id')->constrained();
             $table->foreignId('programme_id')->constrained();
             $table->foreignId('semester_id')->constrained();
@@ -113,7 +113,7 @@ return new class extends Migration
             $table->string('lga');
             $table->foreignId('programme_id')->constrained();
             $table->string('date_of_birth');
-            $table->string('passport'); // file path or filename
+            $table->string('passport');
             $table->string('credential');
             $table->foreignId('user_id')->constrained();
             $table->foreignId('application_id')->constrained();
@@ -128,6 +128,7 @@ return new class extends Migration
             $table->foreignId('school_session_id')->constrained();
             $table->foreignId('semester_id')->constrained();
             $table->foreignId('level_id')->constrained();
+            $table->enum('status', ['draft', 'submitted', 'approved', 'declined'])->default('draft');
             $table->timestamps();
 
             $table->unique(['student_id', 'course_id', 'semester_id']);
@@ -142,19 +143,15 @@ return new class extends Migration
             $table->foreignId('level_id')->constrained();
             $table->decimal('score', 5, 2);
             $table->string('grade', 2);
+            $table->decimal('grade_point', 3, 2)->nullable();
             $table->timestamps();
 
             $table->unique(['student_id', 'course_id', 'semester_id']);
         });
     }
 
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        // Drop in reverse dependency order
         Schema::dropIfExists('results');
         Schema::dropIfExists('course_registrations');
         Schema::dropIfExists('students');
