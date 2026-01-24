@@ -480,7 +480,7 @@
                             <label for="payment_reference" class="form-label">Payment Reference Number *</label>
                             <input type="text" class="form-control @error('payment_reference') is-invalid @enderror" 
                                    id="payment_reference" name="payment_reference" 
-                                   placeholder="e.g., THBS-1234567890" required>
+                                   placeholder="e.g., THBS-UDISFVXB-1234257678" required>
                             <div class="form-text">Enter the payment reference number from your email</div>
                           
                         </div>
@@ -574,7 +574,7 @@
                             <label for="application_number" class="form-label">Application Number *</label>
                             <input type="text" class="form-control @error('application_number') is-invalid @enderror" 
                                    id="application_number" name="application_number" 
-                                   placeholder="Enter your application number (e.g., THBS-APP-2024-001)" required>
+                                   placeholder="Enter your application number (e.g., BSUTH-465294-2024)" required>
                             @error('application_number')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
